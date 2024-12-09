@@ -1,12 +1,8 @@
 
 class Tile():
-    def __init__(self, coordinates, has_box=False, is_wall=False,
-                 can_hold=False, is_empty=True):
-        self.__has_box = has_box
-        self.__is_wall = is_wall
-        self.__can_hold = can_hold
+    def __init__(self, coordinates, is_empty=True):
         self.__location = coordinates
-        self.__is_empty = False
+        self.__is_empty = is_empty
 
 
 class Player():
@@ -27,6 +23,17 @@ class Player():
 
 
 class BoxTile(Tile):
-    def __init__(self, coordinates, has_box=False, is_wall=False,
-                 can_hold=False, is_empty=True):
-        super().__init__(coordinates, has_box, is_wall, can_hold, is_empty)
+    def __init__(self, coordinates, is_empty=True):
+        super().__init__(coordinates, is_empty)
+
+    def push_up(self):
+        pass
+
+    def push_down(self):
+        pass
+
+    def push_left(self):
+        pass
+
+    def push_right(self):
+        pass
