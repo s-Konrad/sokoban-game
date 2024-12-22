@@ -1,0 +1,35 @@
+{
+    "tiles":[
+        {
+            "id":[0, 0],
+            "type": "void"
+
+        },
+        {
+            "id":[1,0],
+            "type": "wall"
+
+        },
+        {
+            "id":[0, 1],
+            "type": "floor"
+
+        },
+        {
+            "id":[1, 1],
+            "type": "button"
+
+        }
+    ],
+    "players": [
+        {
+            "position":[1, 1]
+        }
+    ],
+    "boxes": [
+        {
+            "position":[0, 1]
+        }
+    ]
+    
+}
