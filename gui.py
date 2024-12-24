@@ -1,8 +1,10 @@
 from PySide2.QtWidgets import (QApplication, QMainWindow, QGraphicsScene,
                                QGraphicsSimpleTextItem,)
+from PySide2.QtCore import Qt
 from ui_sokobon import Ui_MainWindow
-from level import get_level, load_data, get_boxes, get_players
+from level import get_level, get_boxes, get_players
 import sys
+import copy
 
 
 class Gui(QMainWindow):
@@ -10,17 +12,18 @@ class Gui(QMainWindow):
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        with open('example.json') as fp:
-            data = load_data(fp)
-        self.setup_level(data)
-        self.marker = self._scene.addEllipse(-10, -10, 10, 10)
-        players = get_players(data)
-        self.draw_players(players)
-        self.setup_agents(data)
 
-    def setup_level(self, load_data):
+        self.setup_level()
+        self.setup_agents()
+        self.player_info = get_players()
+        self.player_marker = self._scene.addEllipse(-10, -10, 10, 10)
+        self.restart_level()
 
-        level = get_level(load_data)
+        self.ui.resetButton.clicked.connect(self.restart_level)
+
+    def setup_level(self):
+
+        level, level_name = get_level()
         self._scene = QGraphicsScene()
         self.ui.levelView.setScene(self._scene)
         for tile in level:
@@ -31,27 +34,31 @@ class Gui(QMainWindow):
             text_item.setPos(-80, -60)
 
         label = self.ui.levelLabel
-        label.setText(load_data['title'])
+        label.setText(level_name)
 
-    def setup_agents(self, load_data):
-        boxes = get_boxes(load_data)
+    def keyPressEvent(self, event):
+        action = {
+            Qt.Key_R: self.restart_level()
+            # Qt.Key_W: pass
+        }
+        # @TODO ZMIENIĆ PLAYERS NA JEDDNEGO PLAYER
+        return super().keyPressEvent(event)
+
+    def setup_agents(self):
+        boxes = get_boxes()
         for box in boxes.values():
             x_coords, y_coords = box.pos()
             marker = self._scene.addRect(-10, -10, 10, 10)
-            marker.setPos(x_coords*100, y_coords*-100)
+            marker.setPos(x_coords*100-50, y_coords*-100-50)
 
     def draw_players(self, players):
         for player in players.values():
             x_coords, y_coords = player.pos()
-            self.marker.setPos(x_coords*100, y_coords*-100)
+            self.player_marker.setPos(x_coords*100, y_coords*-100)
 
-        def set_label():
-            for player in players.values():
-                player.move_left()
-            self.draw_players(players)
-            print(f'{players}\n')
-# for some reason clicked happens multiple times at once may be a recursion problem
-        self.ui.resetButton.clicked.connect(set_label)
+    def restart_level(self):
+        self.players = copy.deepcopy(self.player_info)
+        self.draw_players(self.players)
 
 
 def gui_main(args):
