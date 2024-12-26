@@ -23,20 +23,27 @@ def render(level, agents):
 
 
 def move(player, boxes, level, event):
-    agent = copy.copy(player)
     action = {
         Qt.Key_W: Player.move_up,
         Qt.Key_S: Player.move_down,
         Qt.Key_A: Player.move_left,
         Qt.Key_D: Player.move_right,
     }
-    a = action.get(event.key())
-    a(agent)
-    if agent.pos() in level:
-        a(player)
-        print(player.pos())
+    action.get(event.key())(player)
+    if player.pos() not in level:
+        undo_move(player, event)
+        # print(player.pos())
 
 
+# usunac te wszystkie przekazywania bo i tak to bedzie wykonywane z poziomu game gdy zwine to z gui
+def undo_move(player, event):
+    reverse_action = {
+        Qt.Key_S: Player.move_up,
+        Qt.Key_W: Player.move_down,
+        Qt.Key_D: Player.move_left,
+        Qt.Key_A: Player.move_right,
+    }
+    reverse_action.get(event.key())(player)
 
 # def move_up(player, boxes):
 #     player.move_up()
@@ -76,6 +83,7 @@ def move(player, boxes, level, event):
 # wtedy ruchy bylyby dostęne do sprawdzania
 def game():
     # read tiles placement and its contents from file
+    moves = []
     level, agents = get_level()
     render(level, agents)
     # gui_main()
