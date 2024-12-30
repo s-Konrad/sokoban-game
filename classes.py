@@ -21,6 +21,7 @@ class HasBox(Exception):
 class NotStepable(Exception):
     pass
 
+from time import sleep
 
 # @dataclass
 class Tile():
@@ -121,8 +122,7 @@ class Game():
         self._level, self._title, self._buttons = level
         self._boxes = boxes
         self._moves = []
-        for box_id in self._boxes:
-            self._level[self._boxes[box_id].pos()].set_ocupation(True)
+        self.mark_tiles()
 
     @property
     def player(self):
@@ -144,6 +144,10 @@ class Game():
     def moves(self):
         return len(self._moves)
 
+    def mark_tiles(self):
+        for box_id in self._boxes:
+            self._level[self._boxes[box_id].pos()].set_ocupation(True)
+
     def finb_box(self, coordinates):
         for box_id in self._boxes:
             if self._boxes[box_id].pos() == coordinates:
@@ -154,7 +158,7 @@ class Game():
 
     def validate_move(self, move):
         try:
-            self._moves.append(move)
+            self._moves.append((move, None))
             self.move(move, self._player)
 
         except KeyError:
@@ -164,22 +168,26 @@ class Game():
             self.undo_move()
             return
         try:
-            box = self._boxes[self.finb_box(self.player.pos())]
+            box_id = self.finb_box(self.player.pos())
+            box = self._boxes[box_id]
             try:
+                self._moves.pop()
+                self._moves.append((move, box_id))
                 self.move(move, box)
                 if not self._level[box.pos()].can_hold():
-                    self.undo_move(box)
+                    self.undo_move()
                     return
 
                 self._level[self.player.pos()].set_ocupation(False)
                 self._level[box.pos()].set_ocupation(True)
+                return
 
                 # print(box.pos())
             except KeyError:
-                self.undo_move(box)
+                self.undo_move()
                 return
             except AttributeError:
-                self.undo_move(box)
+                self.undo_move()
                 return
         except IndexError:
             pass
@@ -194,8 +202,11 @@ class Game():
         action = actions.get(move)
         # player = self.player
         level = self.level
-
-        action(agent)
+        if action:
+            action(agent)
+        else:
+            self._moves.pop()
+            return
 
         tile = level[agent.pos()]
         tile.can_hold()
@@ -217,18 +228,29 @@ class Game():
         #         if
         #         break
 
-    def undo_move(self, agent=None):
+    def undo_move(self):
         reverse_action = {
             'w': Agent.move_down,
             'a': Agent.move_right,
             's': Agent.move_up,
             'd': Agent.move_left,
         }
-        reverse_action.get(self._moves[-1])(self._player)
+        move = self._moves[-1][0]
+        agent = self._moves[-1][1]
+        reverse_action.get(move)(self._player)
         if agent is not None:
-            reverse_action.get(self._moves[-1])(agent)
-
+            reverse_action.get(move)(self._boxes[agent])
         self._moves.pop()
+
+    def valid_undo(self):
+        try:
+            agent = self._moves[-1][1]
+            self._level[self._boxes[agent].pos()].set_ocupation(False)
+            self.undo_move()
+            self._level[self._boxes[agent].pos()].set_ocupation(True)
+        except KeyError:
+            self.undo_move()
+
 # zmienic values na liste
     def game_ended(self):
         for button_id in self._buttons:

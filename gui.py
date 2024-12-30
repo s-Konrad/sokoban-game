@@ -24,12 +24,14 @@ class Gui(QMainWindow):
         self.pass_window = pass_window
         self.menu = menu
         self.game_window = game_window
+
         self.menu.ui.PlayButton.clicked.connect(self.go_to_game)
         self.pass_window.ui.nextLevelButton.clicked.connect(self.go_to_level)
 
         self.pc = 1
 
     def go_to_game(self):
+        # lambda
         self.ui.stackedWidget.setCurrentIndex(1)
 
     def go_to_level(self):
@@ -105,7 +107,7 @@ class GameWindow(QWidget):
         if event.key() == Qt.Key_R:
             self.restart_level()
         elif event.key() == Qt.Key_U:
-            self._game_instance.undo_move()
+            self._game_instance.valid_undo()
         else:
 
             self._game_instance.validate_move(event.text())
@@ -177,14 +179,14 @@ class PassScreen(QWidget):
 def gui_main(argv):
     app = QApplication(argv)
     game = Game(*get_level(1))
-    stack = QStackedWidget()
+    # stack = QStackedWidget()
     menu_window = Menu()
     game_window = GameWindow(game)
     pass_window = PassScreen()
     gui = Gui(menu_window, game_window, pass_window)
-    if not stack.objectName():
-        stack.setObjectName(u"stack")
-    stack.resize(800, 800)
+    # if not stack.objectName():
+    #     stack.setObjectName(u"stack")
+    # stack.resize(800, 800)
 
     # stack.setStyleSheet(u"QWidget#stack {background-color: rgba(0, 200, 127, 255)}")
 
