@@ -250,6 +250,8 @@ class Game():
             self._level[self._boxes[agent].pos()].set_ocupation(True)
         except KeyError:
             self.undo_move()
+        except IndexError:
+            pass
 
 # zmienic values na liste
     def game_ended(self):

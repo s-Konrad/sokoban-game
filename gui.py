@@ -71,6 +71,14 @@ class GameWindow(QWidget):
         # self.box_markers
 
         self.ui.resetButton.clicked.connect(self.restart_level)
+        self.ui.undoButton.clicked.connect(self.undo_move)
+
+    def undo_move(self):
+        self._game_instance.valid_undo()
+        self.draw_agents()
+        # move counter do funkcji najlepiej jakiejs do rysowania
+        move_counter = self.ui.moveCounter
+        move_counter.setText(f'Moves: {self._game_instance.moves}')
 
     def setup_level(self):
         self.setup_tiles()
