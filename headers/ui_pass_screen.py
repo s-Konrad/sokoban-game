@@ -23,36 +23,47 @@ class Ui_PassWindow(object):
         if not PassWindow.objectName():
             PassWindow.setObjectName(u"PassWindow")
         PassWindow.resize(400, 300)
+        PassWindow.setLayoutDirection(Qt.LeftToRight)
+        PassWindow.setStyleSheet(u"QWidget#nextLevelButton{background-color: qradialgradient(spread:repeat, cx:0.5, cy:0.5, radius:0.077, fx:0.5, fy:0.5, stop:0 rgba(0, 169, 255, 147), stop:0.497326 rgba(0, 0, 0, 0), stop:1 rgba(0, 169, 255, 147))}")
         self.verticalLayout = QVBoxLayout(PassWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.winLabel = QLabel(PassWindow)
         self.winLabel.setObjectName(u"winLabel")
+        self.winLabel.setStyleSheet(u"QWidget#winLabel {font: 22pt}")
+        self.winLabel.setAlignment(Qt.AlignCenter)
 
-        self.horizontalLayout.addWidget(self.winLabel)
+        self.verticalLayout.addWidget(self.winLabel)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout.addItem(self.horizontalSpacer)
-
-        self.label_2 = QLabel(PassWindow)
-        self.label_2.setObjectName(u"label_2")
-
-        self.horizontalLayout.addWidget(self.label_2)
-
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.moveCounter = QLabel(PassWindow)
         self.moveCounter.setObjectName(u"moveCounter")
 
-        self.horizontalLayout.addWidget(self.moveCounter)
+        self.horizontalLayout.addWidget(self.moveCounter, 0, Qt.AlignHCenter)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer)
+
         self.nextLevelButton = QPushButton(PassWindow)
         self.nextLevelButton.setObjectName(u"nextLevelButton")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.nextLevelButton.sizePolicy().hasHeightForWidth())
+        self.nextLevelButton.setSizePolicy(sizePolicy)
+        self.nextLevelButton.setMinimumSize(QSize(100, 0))
+        self.nextLevelButton.setLayoutDirection(Qt.LeftToRight)
 
-        self.verticalLayout.addWidget(self.nextLevelButton)
+        self.horizontalLayout_2.addWidget(self.nextLevelButton)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
 
 
         self.retranslateUi(PassWindow)
@@ -63,7 +74,6 @@ class Ui_PassWindow(object):
     def retranslateUi(self, PassWindow):
         PassWindow.setWindowTitle(QCoreApplication.translate("PassWindow", u"PassWindow", None))
         self.winLabel.setText(QCoreApplication.translate("PassWindow", u"Congratulations!", None))
-        self.label_2.setText(QCoreApplication.translate("PassWindow", u"You finished in ", None))
         self.moveCounter.setText(QCoreApplication.translate("PassWindow", u"999", None))
         self.nextLevelButton.setText(QCoreApplication.translate("PassWindow", u"Next Level ->", None))
     # retranslateUi
