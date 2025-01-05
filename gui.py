@@ -1,16 +1,21 @@
-from PySide6.QtWidgets import (QApplication, QStackedWidget, QGraphicsScene,
-                               QGraphicsSimpleTextItem, QWidget, QMainWindow)
-from ui_sokobon import Ui_gameWindow
-from ui_menu import Ui_Form
-from ui_pass_screen import Ui_PassWindow
-from ui_gui import Ui_MainWindow
+from PySide6.QtWidgets import QApplication, QGraphicsScene, QWidget
+from PySide6.QtWidgets import QMainWindow
+
+from headers.ui_sokobon import Ui_gameWindow
+from headers.ui_menu import Ui_Menu
+from headers.ui_pass_screen import Ui_PassWindow
+from headers.ui_gui import Ui_MainWindow
 from PySide6.QtGui import QColor
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QSize
 from classes import Game
-# from game import move
-# z classes import game
 from level import get_level
 import sys
+
+
+GAME_SCALE = 1
+BTN_SIZE = 35 * GAME_SCALE
+AGENT_SIZE = 15 * GAME_SCALE
+TILE_SIZE = 50 * GAME_SCALE
 
 
 class Gui(QMainWindow):
@@ -24,11 +29,11 @@ class Gui(QMainWindow):
         self.pass_window = pass_window
         self.menu = menu
         self.game_window = game_window
+        self.pc = 1
 
         self.menu.ui.PlayButton.clicked.connect(self.go_to_game)
         self.pass_window.ui.nextLevelButton.clicked.connect(self.go_to_level)
-
-        self.pc = 1
+        self.menu.ui.QuitButton.clicked.connect(self.close)
 
     def go_to_game(self):
         # lambda
@@ -38,17 +43,19 @@ class Gui(QMainWindow):
 
         try:
             self.pc += 1
-            self.pass_window.ui.moveCounter.setText(str(self.game_window._game_instance.moves))
-            self.game_window._game_instance.load_level(*get_level(self.pc))
+            self.pass_window.ui.moveCounter.setText(
+                str(self.game_window._game.moves))
+            self.game_window._game.load_level(*get_level(self.pc))
             self.game_window.setup_level()
             self.game_window.draw_agents()
             self.ui.stackedWidget.setCurrentIndex(1)
         except FileNotFoundError:
-            self.ui.stackedWidget.setCurrentIndex(2)
+            # @TODO IDK COS zmienic
+            # self.ui.stackedWidget.setCurrentIndex(2)
             end_screen = self.pass_window.ui
-            end_screen.label_2.setText('Awesome! You passed the game')
-            end_screen.ui.nextLevelButton.hide()
-            end_screen.ui.moveCounter.hide()
+            end_screen.moveCounter.setText('No more levels left!\n'
+                                           'You passed the game')
+            end_screen.nextLevelButton.hide()
 
 
 class GameWindow(QWidget):
@@ -58,11 +65,10 @@ class GameWindow(QWidget):
         self.ui.setupUi(self)
 # połACZyc box i player w agents do resetu i do self boxes
         self._scene = QGraphicsScene()
-        self._game_instance = game
+        self._game = game
         # usunac ponizsze przypisania
-        self.level, self.level_name = game.level, game.title
         self.player_info = game.player
-        self.boxes = self._game_instance.boxes
+        self.boxes = self._game.boxes
         # self.setup_tiles()
         self.box_markers = {}
         self.setup_level()
@@ -74,15 +80,25 @@ class GameWindow(QWidget):
         self.ui.undoButton.clicked.connect(self.undo_move)
 
     def undo_move(self):
-        self._game_instance.valid_undo()
+        self._game.valid_undo()
         self.draw_agents()
         # move counter do funkcji najlepiej jakiejs do rysowania
         move_counter = self.ui.moveCounter
-        move_counter.setText(f'Moves: {self._game_instance.moves}')
+        move_counter.setText(f'Moves: {self._game.moves}')
+
+    @staticmethod
+    def _format_size(size):
+        return -size, -size, size, size
+
+    @staticmethod
+    def _format_position(x_coords, y_coords, object_size):
+        offset = (TILE_SIZE-object_size)/2
+        return x_coords*TILE_SIZE-offset, y_coords*-TILE_SIZE-offset
 
     def setup_level(self):
         self.setup_tiles()
-        self.player_marker = self._scene.addEllipse(-30, -30, 30, 30)
+        fsize = self._format_size
+        self.player_marker = self._scene.addEllipse(*fsize(AGENT_SIZE))
         self.player_marker.setBrush(QColor("#0000ff"))
         self.setup_boxes()
 
@@ -90,66 +106,75 @@ class GameWindow(QWidget):
         # level w self
         self._scene.clear()
         self.ui.levelView.setScene(self._scene)
-        level = self._game_instance.level
+        level = self._game.level
+        fsize = self._format_size
         for tile_id in level:
             x_coords, y_coords = tile_id
-            marker = self._scene.addRect(-100, -100, 100, 100)
-            marker.setPos(x_coords*100, y_coords*-100)
+            marker = self._scene.addRect(*fsize(TILE_SIZE))
+            marker.setPos(x_coords*TILE_SIZE, y_coords*-TILE_SIZE)
             marker.setBrush(QColor("#eeeeee"))
             if str(level[tile_id]) == 'unknown':
                 marker.setBrush(QColor("#444444"))
             elif str(level[tile_id]) == 'button':
-                marker = self._scene.addRect(-70, -70, 70, 70)
-                marker.setPos(x_coords*100-15, y_coords*-100-15)
+                fposition = self._format_position
+                marker = self._scene.addRect(*fsize(BTN_SIZE))
+                marker.setPos(*fposition(x_coords, y_coords, BTN_SIZE))
                 marker.setBrush(QColor("#ff0000"))
 
             # text_item = QGraphicsSimpleTextItem(str(level[tile_id]), marker)
             # text_item.setPos(-80, -60)
 
         label = self.ui.levelLabel
-        label.setText(self._game_instance.title)
+        label.setText(self._game.title)
         move_counter = self.ui.moveCounter
-        move_counter.setText(f'Moves: {self._game_instance.moves}')
+        move_counter.setText(f'Moves: {self._game.moves}')
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_R:
             self.restart_level()
         elif event.key() == Qt.Key_U:
-            self._game_instance.valid_undo()
+            self._game.valid_undo()
         else:
-
-            self._game_instance.validate_move(event.text())
+            # to chyba mozna wydzilic
+            self._game.validate_move(event.text())
 
         self.draw_agents()
-        if self._game_instance.game_ended():
-            self.parent().widget(2).ui.moveCounter.setText(f'{self._game_instance.moves} moves')
+        if self._game.game_ended():
+            end_text = 'You finished in {moves_num} moves'
+            self.parent().widget(2).ui.moveCounter.setText(end_text.format(
+                moves_num=self._game.moves))
+
             QTimer.singleShot(400, lambda: self.parent().setCurrentIndex(2))
-            # sleep(2)
-            # self.moveCounter.setText(str(self._game_instance.moves))
+            # @todo mozna to z gui albo next level z next level
         move_counter = self.ui.moveCounter
-        move_counter.setText(f'Moves: {self._game_instance.moves}')
+        move_counter.setText(f'Moves: {self._game.moves}')
         return super().keyPressEvent(event)
 
     def setup_boxes(self):
-        for box_id in self._game_instance.boxes:
-            x_coords, y_coords = self._game_instance.boxes[box_id].pos()
-            marker = self._scene.addRect(-30, -30, 30, 30)
-            marker.setPos(x_coords*100-50, y_coords*-100-50)
+        for box_id in self._game.boxes:
+            # x_coords, y_coords = self._game.boxes[box_id].pos()
+            fsize = self._format_size
+            marker = self._scene.addRect(*fsize(AGENT_SIZE))
+            # offset = TILE_SIZE/2
+            # marker.setPos(x_coords*TILE_SIZE-offset, y_coords*-TILE_SIZE-
             marker.setBrush(QColor('#d5cdc9'))
             self.box_markers[box_id] = marker
 
     def draw_agents(self):
-        x_coords, y_coords = self._game_instance.player.pos()
-        self.player_marker.setPos(x_coords*100-35, y_coords*-100-35)
-        for box_id in self._game_instance.boxes:
-            x_coords, y_coords = self._game_instance.boxes[box_id].pos()
-            self.box_markers[box_id].setPos(x_coords*100-35, y_coords*-100-35)
+        x_coords, y_coords = self._game.player.pos()
+        fposition = self._format_position
+        self.player_marker.setPos(*fposition(x_coords, y_coords, AGENT_SIZE))
+        for box_id in self._game.boxes:
+            x_coords, y_coords = self._game.boxes[box_id].pos()
+            self.box_markers[box_id].setPos(*fposition(x_coords,
+                                                       y_coords,
+                                                       AGENT_SIZE))
 
-    def restart_level(self, level=None):
-        # @TODO zmienic kkopie fasf uprzatnac przekazywanie danych z game do gui pls
-        self._game_instance.load_level(*get_level(1))
+    def restart_level(self):
+        level = self._game.title[6:]
+        self._game.load_level(*get_level(level))
         move_counter = self.ui.moveCounter
-        move_counter.setText(f'Moves: {self._game_instance.moves}')
+        move_counter.setText(f'Moves: {self._game.moves}')
         self.setup_level()
         self.draw_agents()
 
@@ -157,7 +182,7 @@ class GameWindow(QWidget):
 class Menu(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.ui = Ui_Form()
+        self.ui = Ui_Menu()
         self.ui.setupUi(self)
 
 
@@ -165,14 +190,16 @@ class PassScreen(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = Ui_PassWindow()
-        self.pc = 1
+        # self.pc = 1
         self.ui.setupUi(self)
+
         # self.ui.nextLevelButton.clicked.connect(self.go_to_level)
+# @TODO tu goto nie potrzebne
 
     def go_to_level(self):
         try:
             self.pc += 1
-            self.parent().game_window._game_instance.load_level(*get_level(self.pc))
+            self.parent().game_window._game.load_level(*get_level(self.pc))
             self.parent_.setup_level()
             # self.parent_.setup_tiles()
             # self.parent_.setup_boxes()
@@ -192,11 +219,10 @@ def gui_main(argv):
     game_window = GameWindow(game)
     pass_window = PassScreen()
     gui = Gui(menu_window, game_window, pass_window)
+    gui.setMinimumSize(QSize(960, 540))
     # if not stack.objectName():
     #     stack.setObjectName(u"stack")
     # stack.resize(800, 800)
-
-    # stack.setStyleSheet(u"QWidget#stack {background-color: rgba(0, 200, 127, 255)}")
 
     # stack.addWidget(menu_window)
     # stack.addWidget(game_window)

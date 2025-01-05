@@ -1,21 +1,68 @@
-from classes import Tile, BoxTile
-import csv
+from classes import (Agent, InvalidOcupation, InvalidTile,
+                     StepableTile, InaccesibleTile, ButtonTile,)
+import json
 
 
-d = {
-      0: Tile,
-      1: BoxTile
-}
-t = d[0](1, False)
-b = d[1](2, False)
+def load_data(fp):
+    return json.load(fp)
+
+# class method static methodlevel.py
+# class player
 
 
-def get_level(fp):
-    level = []
-    reader = csv.DictReader(fp)
-    for row in reader:
-        position = (row['position_x'], row['position_y'])
-        type = row['type']
-        tile = Tile(position, type)
-        level.append(tile)
-    return level
+def get_floor(level_data):
+    types_dict = {
+        'floor': StepableTile,
+        'wall': InaccesibleTile,
+        'void': InaccesibleTile,
+        'button': ButtonTile,
+    }
+
+    level = {}
+    buttons_ids = []
+    level_name = level_data['title']
+    tiles_list = level_data['tiles']
+    for tile in tiles_list:
+        id = tuple(tile['id'])
+        type_ = tile['type']
+        if id in level:
+            raise InvalidTile('Tile already exists')
+
+        level[id] = types_dict[type_](id)
+        if type_ == 'button':
+            buttons_ids.append(id)
+    return level, level_name, buttons_ids
+
+
+def get_player(level_data):
+    player = level_data['player']
+    position = tuple(player['position'])
+    return Agent(position)
+
+# @TODO sprawdzanie cy jedno nie stoi na drugim(może łączac box i player lub
+# agent i dziedziczate box player ktoreych instancje bedza na liscie agent) +
+# sprawdzanie czy nie stoja na jednym
+# i usunąć id
+
+
+def get_boxes(level_data) -> dict[Agent]:
+    boxes = {}
+    boxes_list = level_data['boxes']
+    for box in boxes_list:
+        id = box['id']
+        position = tuple(box['position'])
+        if id in boxes:
+            raise InvalidOcupation
+        boxes[id] = Agent(position)
+    return boxes
+# gui i sprite https://forum.qt.io/topic/13628/getting-started-with-a-tile
+# -based-game-in-qt/2
+
+
+def get_level(level):
+    with open(f'levels/{level}.json') as fp:
+        game_data = load_data(fp)
+        player = get_player(game_data)
+        level_data = get_floor(game_data)
+        boxes = get_boxes(game_data)
+        return player, level_data, boxes

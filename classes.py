@@ -2,15 +2,17 @@ class InvalidTile(Exception):
     pass
 
 
-class OcupationError(Exception):
+class InvalidOcupation(Exception):
     pass
-
-
-class UnableToHold(Exception):
-    pass
+# zamienic na overlapingAgents i Not stepable
 
 
 class InvalidCoordinates(ValueError):
+    pass
+
+
+#
+class UnableToHold(Exception):
     pass
 
 
@@ -21,7 +23,6 @@ class HasBox(Exception):
 class NotStepable(Exception):
     pass
 
-from time import sleep
 
 # @dataclass
 class Tile():
@@ -40,11 +41,8 @@ class Tile():
 
         self.__location = coordinates
 
-        if not (0 <= coordinates[0] < 32 and 0 <= coordinates[1] < 32):
+        if not (0 <= coordinates[0] < 16 and 0 <= coordinates[1] < 16):
             raise InvalidCoordinates
-
-    def is_stepable(self):
-        return False
         # if tile_type in [0, 1]:
         #     if ocupied is not None:
         #         raise InvalidTile
@@ -89,7 +87,7 @@ class InaccesibleTile(Tile):
         super().__init__(coordinates)
 
 
-# class WallTile(Tile): ->> inaccesibleTile
+# class WallTile(Tile): ->> inaccesibleTile!!!!!!!!!!!!!!!!
 # odpowiednie metody i hierarchia
 
 class Agent():
@@ -123,6 +121,19 @@ class Game():
         self._boxes = boxes
         self._moves = []
         self.mark_tiles()
+        self._check_correctness()
+
+    def _check_correctness(self):
+        boxes_pos = {self._boxes[box_id].pos() for box_id in self._boxes}
+        if len(boxes_pos) != len(self._boxes):
+            raise InvalidOcupation
+        # if self._player.pos() in boxes_pos:
+        #     raise InvalidOcupation
+        try:
+            if self._level[self._player.pos()].can_hold() is False:
+                raise InvalidOcupation
+        except AttributeError:
+            raise InvalidOcupation
 
     @property
     def player(self):
@@ -146,7 +157,10 @@ class Game():
 
     def mark_tiles(self):
         for box_id in self._boxes:
-            self._level[self._boxes[box_id].pos()].set_ocupation(True)
+            try:
+                self._level[self._boxes[box_id].pos()].set_ocupation(True)
+            except AttributeError:
+                raise InvalidOcupation
 
     def finb_box(self, coordinates):
         for box_id in self._boxes:
@@ -182,7 +196,6 @@ class Game():
                 self._level[box.pos()].set_ocupation(True)
                 return
 
-                # print(box.pos())
             except KeyError:
                 self.undo_move()
                 return
@@ -219,7 +232,6 @@ class Game():
         #     # self.undo_move()
         # except IndexError:
         #     pass
-
 
         # zamienić to gorne na sprawdzanie wywolania tile.is stepable
         # for box_id in self._boxes:
@@ -260,4 +272,3 @@ class Game():
                 return False
         else:
             return True
-
