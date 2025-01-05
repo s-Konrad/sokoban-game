@@ -1,0 +1,353 @@
+{
+    "title": "Level 3",
+    "tiles": [
+        {
+            "id": [
+                0,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                0,
+                1
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                0,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                1,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                1,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                1,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                2,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                2,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                2,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                3,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                3,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                3,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                4,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                4,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                4,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                5,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                5,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                5,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                6,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                6,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                6,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                7,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                7,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                7,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                8,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                8,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                8,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                9,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                9,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                9,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                10,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                10,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                10,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                11,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                11,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                11,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                12,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                12,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                12,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                13,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                13,
+                1
+            ],
+            "type": "floor"
+        },
+        {
+            "id": [
+                13,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                14,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                14,
+                1
+            ],
+            "type": "button"
+        },
+        {
+            "id": [
+                14,
+                2
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                15,
+                0
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                15,
+                1
+            ],
+            "type": "wall"
+        },
+        {
+            "id": [
+                15,
+                2
+            ],
+            "type": "wall"
+        }
+    ],
+    "player":{
+            "id": 0,
+            "position":[1, 1]
+        },
+
+    "boxes": [
+        {
+            "id": 0,
+            "position":[2, 1]
+        }
+    ]
+
+}
