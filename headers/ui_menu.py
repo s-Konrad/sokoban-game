@@ -23,7 +23,7 @@ class Ui_Menu(object):
     def setupUi(self, Menu):
         if not Menu.objectName():
             Menu.setObjectName(u"Menu")
-        Menu.resize(400, 300)
+        Menu.resize(806, 519)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -31,22 +31,22 @@ class Ui_Menu(object):
         Menu.setSizePolicy(sizePolicy)
         Menu.setBaseSize(QSize(400, 0))
         Menu.setAutoFillBackground(False)
-        Menu.setStyleSheet(u"QWidget#PlayButton {background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(32, 96, 210, 255), stop:1 rgba(255, 255, 255, 255))}\n"
-"QWidget#QuitButton {background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(32, 96, 210, 255), stop:1 rgba(255, 255, 255, 255))}\n"
-"QWidget#label {font:  22pt}\n"
+        Menu.setStyleSheet(u"QWidget#playButton {background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(32, 96, 210, 255), stop:1 rgba(255, 255, 255, 255))}\n"
+"QWidget#quitButton {background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(32, 96, 210, 255), stop:1 rgba(255, 255, 255, 255))}\n"
+"QWidget#label {font:  36pt}\n"
 "")
         self.horizontalLayout = QHBoxLayout(Menu)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.horizontalSpacer = QSpacerItem(141, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer)
 
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout.addItem(self.verticalSpacer)
+        self.verticalLayout.addItem(self.verticalSpacer_3)
 
         self.label = QLabel(Menu)
         self.label.setObjectName(u"label")
@@ -58,30 +58,52 @@ class Ui_Menu(object):
 
         self.verticalLayout.addWidget(self.label)
 
-        self.PlayButton = QPushButton(Menu)
-        self.PlayButton.setObjectName(u"PlayButton")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.PlayButton.sizePolicy().hasHeightForWidth())
-        self.PlayButton.setSizePolicy(sizePolicy1)
-        self.PlayButton.setMinimumSize(QSize(80, 25))
-        self.PlayButton.setLayoutDirection(Qt.LeftToRight)
-
-        self.verticalLayout.addWidget(self.PlayButton)
-
-        self.QuitButton = QPushButton(Menu)
-        self.QuitButton.setObjectName(u"QuitButton")
-        sizePolicy1.setHeightForWidth(self.QuitButton.sizePolicy().hasHeightForWidth())
-        self.QuitButton.setSizePolicy(sizePolicy1)
-        self.QuitButton.setLayoutDirection(Qt.LeftToRight)
-        self.QuitButton.setAutoFillBackground(False)
-
-        self.verticalLayout.addWidget(self.QuitButton)
-
         self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer_2)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_3)
+
+        self.verticalLayout_3 = QVBoxLayout()
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.playButton = QPushButton(Menu)
+        self.playButton.setObjectName(u"playButton")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.playButton.sizePolicy().hasHeightForWidth())
+        self.playButton.setSizePolicy(sizePolicy1)
+        self.playButton.setMinimumSize(QSize(80, 25))
+        self.playButton.setLayoutDirection(Qt.LeftToRight)
+
+        self.verticalLayout_3.addWidget(self.playButton)
+
+        self.quitButton = QPushButton(Menu)
+        self.quitButton.setObjectName(u"quitButton")
+        sizePolicy1.setHeightForWidth(self.quitButton.sizePolicy().hasHeightForWidth())
+        self.quitButton.setSizePolicy(sizePolicy1)
+        self.quitButton.setLayoutDirection(Qt.LeftToRight)
+        self.quitButton.setAutoFillBackground(False)
+
+        self.verticalLayout_3.addWidget(self.quitButton)
+
+
+        self.horizontalLayout_2.addLayout(self.verticalLayout_3)
+
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_4)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
+
+        self.verticalSpacer_4 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout.addItem(self.verticalSpacer_4)
 
 
         self.horizontalLayout.addLayout(self.verticalLayout)
@@ -98,7 +120,7 @@ class Ui_Menu(object):
 
     def retranslateUi(self, Menu):
         Menu.setWindowTitle(QCoreApplication.translate("Menu", u"Menu", None))
-        self.PlayButton.setText(QCoreApplication.translate("Menu", u"Play", None))
-        self.QuitButton.setText(QCoreApplication.translate("Menu", u"Quit", None))
+        self.playButton.setText(QCoreApplication.translate("Menu", u"Play", None))
+        self.quitButton.setText(QCoreApplication.translate("Menu", u"Quit", None))
     # retranslateUi
 

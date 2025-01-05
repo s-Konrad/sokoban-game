@@ -38,6 +38,7 @@ class Ui_PassWindow(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.moveCounter = QLabel(PassWindow)
         self.moveCounter.setObjectName(u"moveCounter")
+        self.moveCounter.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
 
         self.horizontalLayout.addWidget(self.moveCounter, 0, Qt.AlignHCenter)
 
