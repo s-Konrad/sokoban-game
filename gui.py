@@ -6,7 +6,7 @@ from headers.ui_menu import Ui_Menu
 from headers.ui_pass_screen import Ui_PassWindow
 from headers.ui_gui import Ui_MainWindow
 from PySide6.QtGui import QColor
-from PySide6.QtCore import Qt, QTimer, QSize
+from PySide6.QtCore import Qt, QTimer
 from classes import Game
 from level import get_level
 import sys
@@ -31,13 +31,10 @@ class Gui(QMainWindow):
         self.game_window = game_window
         self.pc = 1
 
-        self.menu.ui.PlayButton.clicked.connect(self.go_to_game)
+        play = self.menu.ui.playButton
+        play.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
         self.pass_window.ui.nextLevelButton.clicked.connect(self.go_to_level)
-        self.menu.ui.QuitButton.clicked.connect(self.close)
-
-    def go_to_game(self):
-        # lambda
-        self.ui.stackedWidget.setCurrentIndex(1)
+        self.menu.ui.quitButton.clicked.connect(self.close)
 
     def go_to_level(self):
 
@@ -50,12 +47,13 @@ class Gui(QMainWindow):
             self.game_window.draw_agents()
             self.ui.stackedWidget.setCurrentIndex(1)
         except FileNotFoundError:
-            # @TODO IDK COS zmienic
-            # self.ui.stackedWidget.setCurrentIndex(2)
-            end_screen = self.pass_window.ui
-            end_screen.moveCounter.setText('No more levels left!\n'
-                                           'You passed the game')
-            end_screen.nextLevelButton.hide()
+            self.ui.stackedWidget.widget(0).ui.playButton.hide()
+            win_text = 'Congrats you passed\n my Sokoban game'
+            win_color = 'color: gold'
+            self.ui.stackedWidget.widget(0).ui.label.setText(win_text)
+            self.ui.stackedWidget.widget(0).ui.label.setStyleSheet(win_color)
+
+            self.ui.stackedWidget.setCurrentIndex(0)
 
 
 class GameWindow(QWidget):
@@ -63,18 +61,12 @@ class GameWindow(QWidget):
         super().__init__(parent)
         self.ui = Ui_gameWindow()
         self.ui.setupUi(self)
-# połACZyc box i player w agents do resetu i do self boxes
+        # czy game nie powinno byc publiczne
         self._scene = QGraphicsScene()
         self._game = game
-        # usunac ponizsze przypisania
-        self.player_info = game.player
-        self.boxes = self._game.boxes
-        # self.setup_tiles()
-        self.box_markers = {}
+        self._box_markers = {}
         self.setup_level()
-        # self.setup_boxes()
         self.restart_level()
-        # self.box_markers
 
         self.ui.resetButton.clicked.connect(self.restart_level)
         self.ui.undoButton.clicked.connect(self.undo_move)
@@ -103,7 +95,6 @@ class GameWindow(QWidget):
         self.setup_boxes()
 
     def setup_tiles(self):
-        # level w self
         self._scene.clear()
         self.ui.levelView.setScene(self._scene)
         level = self._game.level
@@ -121,9 +112,6 @@ class GameWindow(QWidget):
                 marker.setPos(*fposition(x_coords, y_coords, BTN_SIZE))
                 marker.setBrush(QColor("#ff0000"))
 
-            # text_item = QGraphicsSimpleTextItem(str(level[tile_id]), marker)
-            # text_item.setPos(-80, -60)
-
         label = self.ui.levelLabel
         label.setText(self._game.title)
         move_counter = self.ui.moveCounter
@@ -136,6 +124,10 @@ class GameWindow(QWidget):
             self._game.valid_undo()
         else:
             # to chyba mozna wydzilic
+            # mv = {
+            #     Qt.Key_R: self.restart_level(),
+            #     Qt.Key_U: self._game.valid_undo()
+            # }
             self._game.validate_move(event.text())
 
         self.draw_agents()
@@ -152,13 +144,10 @@ class GameWindow(QWidget):
 
     def setup_boxes(self):
         for box_id in self._game.boxes:
-            # x_coords, y_coords = self._game.boxes[box_id].pos()
             fsize = self._format_size
             marker = self._scene.addRect(*fsize(AGENT_SIZE))
-            # offset = TILE_SIZE/2
-            # marker.setPos(x_coords*TILE_SIZE-offset, y_coords*-TILE_SIZE-
             marker.setBrush(QColor('#d5cdc9'))
-            self.box_markers[box_id] = marker
+            self._box_markers[box_id] = marker
 
     def draw_agents(self):
         x_coords, y_coords = self._game.player.pos()
@@ -166,9 +155,9 @@ class GameWindow(QWidget):
         self.player_marker.setPos(*fposition(x_coords, y_coords, AGENT_SIZE))
         for box_id in self._game.boxes:
             x_coords, y_coords = self._game.boxes[box_id].pos()
-            self.box_markers[box_id].setPos(*fposition(x_coords,
-                                                       y_coords,
-                                                       AGENT_SIZE))
+            self._box_markers[box_id].setPos(*fposition(x_coords,
+                                                        y_coords,
+                                                        AGENT_SIZE))
 
     def restart_level(self):
         level = self._game.title[6:]
@@ -214,29 +203,13 @@ class PassScreen(QWidget):
 def gui_main(argv):
     app = QApplication(argv)
     game = Game(*get_level(1))
-    # stack = QStackedWidget()
     menu_window = Menu()
     game_window = GameWindow(game)
     pass_window = PassScreen()
     gui = Gui(menu_window, game_window, pass_window)
-    gui.setMinimumSize(QSize(960, 540))
-    # if not stack.objectName():
-    #     stack.setObjectName(u"stack")
-    # stack.resize(800, 800)
 
-    # stack.addWidget(menu_window)
-    # stack.addWidget(game_window)
-    # stack.addWidget(pass_window)
-    # menu_window.stack = stack
-    # game_window.stack = stack
-    # pass_window.stack = stack
-    # stack.show()
     gui.show()
-    # pass_window.ui.nextLevelButton.clicked.connect(pass_window.go_to_level)
-    # gui.ui.stackedWidget.setCurrentIndex(0)
-    # gui.ui.stackedWidget.setCurrentIndex(0)
-    # game_window.show()
-    # menu_window.show()
+
     return app.exec()
 
 

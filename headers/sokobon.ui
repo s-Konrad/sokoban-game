@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>876</width>
+    <width>960</width>
     <height>600</height>
    </rect>
   </property>
@@ -15,6 +15,12 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>960</width>
+    <height>540</height>
+   </size>
   </property>
   <property name="focusPolicy">
    <enum>Qt::WheelFocus</enum>

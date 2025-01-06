@@ -24,7 +24,7 @@ class Ui_PassWindow(object):
             PassWindow.setObjectName(u"PassWindow")
         PassWindow.resize(400, 300)
         PassWindow.setLayoutDirection(Qt.LeftToRight)
-        PassWindow.setStyleSheet(u"QWidget#nextLevelButton{background-color: qradialgradient(spread:repeat, cx:0.5, cy:0.5, radius:0.077, fx:0.5, fy:0.5, stop:0 rgba(0, 169, 255, 147), stop:0.497326 rgba(0, 0, 0, 0), stop:1 rgba(0, 169, 255, 147))}")
+        PassWindow.setStyleSheet(u"QWidget#nextLevelButton{background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(32, 96, 210, 255), stop:1 rgba(255, 255, 255, 255))}")
         self.verticalLayout = QVBoxLayout(PassWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.winLabel = QLabel(PassWindow)
