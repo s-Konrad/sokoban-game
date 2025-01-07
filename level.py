@@ -1,4 +1,4 @@
-from classes import (Agent, InvalidOcupation, InvalidTile,
+from classes import (Agent, Board, InvalidOcupation, InvalidTile,
                      StepableTile, InaccesibleTile, ButtonTile,)
 import json
 
@@ -10,7 +10,7 @@ def load_data(fp):
 # class player
 
 
-def get_floor(level_data):
+def get_board(level_data):
     types_dict = {
         'floor': StepableTile,
         'wall': InaccesibleTile,
@@ -18,20 +18,21 @@ def get_floor(level_data):
         'button': ButtonTile,
     }
 
-    level = {}
+    tiles = {}
     buttons_ids = []
     level_name = level_data['title']
     tiles_list = level_data['tiles']
     for tile in tiles_list:
         id = tuple(tile['id'])
         type_ = tile['type']
-        if id in level:
+        if id in tiles:
             raise InvalidTile('Tile already exists')
 
-        level[id] = types_dict[type_](id)
+        tiles[id] = types_dict[type_](id)
         if type_ == 'button':
             buttons_ids.append(id)
-    return level, level_name, buttons_ids
+    board = Board(tiles, buttons_ids)
+    return level_name, board
 
 
 def get_player(level_data):
@@ -62,7 +63,7 @@ def get_boxes(level_data) -> dict[Agent]:
 def get_level(level):
     with open(f'levels/{level}.json') as fp:
         game_data = load_data(fp)
+        title, board = get_board(game_data)
         player = get_player(game_data)
-        level_data = get_floor(game_data)
         boxes = get_boxes(game_data)
-        return player, level_data, boxes
+        return title, board, player, boxes

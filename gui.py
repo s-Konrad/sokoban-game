@@ -61,7 +61,6 @@ class GameWindow(QWidget):
         super().__init__(parent)
         self.ui = Ui_gameWindow()
         self.ui.setupUi(self)
-        # czy game nie powinno byc publiczne
         self._scene = QGraphicsScene()
         self._game = game
         self._box_markers = {}
@@ -104,7 +103,7 @@ class GameWindow(QWidget):
             marker = self._scene.addRect(*fsize(TILE_SIZE))
             marker.setPos(x_coords*TILE_SIZE, y_coords*-TILE_SIZE)
             marker.setBrush(QColor("#eeeeee"))
-            if str(level[tile_id]) == 'unknown':
+            if str(level[tile_id]) == 'wall':
                 marker.setBrush(QColor("#444444"))
             elif str(level[tile_id]) == 'button':
                 fposition = self._format_position
