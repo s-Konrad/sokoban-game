@@ -3,24 +3,23 @@ from classes import (Agent, Board, InvalidOcupation, InvalidTile,
 import json
 
 
-def load_data(fp):
+def load_data(fp) -> dict:
     return json.load(fp)
 
-# class method static methodlevel.py
-# class player
+
+def get_title(level_data: dict) -> str:
+    return level_data['title']
 
 
-def get_board(level_data):
+def get_board(level_data: dict) -> tuple[str, Board]:
     types_dict = {
         'floor': StepableTile,
         'wall': InaccesibleTile,
-        'void': InaccesibleTile,
         'button': ButtonTile,
     }
 
     tiles = {}
     buttons_ids = []
-    level_name = level_data['title']
     tiles_list = level_data['tiles']
     for tile in tiles_list:
         id = tuple(tile['id'])
@@ -32,21 +31,20 @@ def get_board(level_data):
         if type_ == 'button':
             buttons_ids.append(id)
     board = Board(tiles, buttons_ids)
-    return level_name, board
+    return board
 
 
-def get_player(level_data):
-    player = level_data['player']
-    position = tuple(player['position'])
+def get_player(level_data: dict) -> Agent:
+    player_pos = level_data['player_pos']
+    position = tuple(player_pos)
     return Agent(position)
 
-# @TODO sprawdzanie cy jedno nie stoi na drugim(może łączac box i player lub
 # agent i dziedziczate box player ktoreych instancje bedza na liscie agent) +
 # sprawdzanie czy nie stoja na jednym
 # i usunąć id
 
 
-def get_boxes(level_data) -> dict[Agent]:
+def get_boxes(level_data: dict) -> dict[Agent]:
     boxes = {}
     boxes_list = level_data['boxes']
     for box in boxes_list:
@@ -60,10 +58,14 @@ def get_boxes(level_data) -> dict[Agent]:
 # -based-game-in-qt/2
 
 
-def get_level(level):
-    with open(f'levels/{level}.json') as fp:
+def get_level(level_id: int) -> tuple[str,
+                                      Board,
+                                      Agent,
+                                      dict[tuple[int, int]: Agent]]:
+    with open(f'levels/{level_id}.json') as fp:
         game_data = load_data(fp)
-        title, board = get_board(game_data)
+        title = get_title(game_data)
+        board = get_board(game_data)
         player = get_player(game_data)
         boxes = get_boxes(game_data)
         return title, board, player, boxes

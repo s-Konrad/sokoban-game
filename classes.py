@@ -1,139 +1,159 @@
 class InvalidTile(Exception):
-    pass
+    def __init__(self, *args):
+        super().__init__(*args)
 
 
 class InvalidOcupation(Exception):
-    pass
-# zamienic na overlapingAgents i Not stepable
+    def __init__(self, *args):
+        super().__init__(*args)
+
+
+class AgentsOverlaping(Exception):
+    def __init__(self, *args):
+        super().__init__(*args)
 
 
 class InvalidCoordinates(ValueError):
-    pass
+    def __init__(self, *args):
+        super().__init__(*args)
 
 
-# @dataclass
 class InaccesibleTile():
-    def __init__(self, coordinates) -> None:
+    def __init__(self, coordinates: tuple[int, int]) -> None:
 
-        self.__location = coordinates
+        self._location = coordinates
 
         if not (0 <= coordinates[0] < 16 and 0 <= coordinates[1] < 16):
-            raise InvalidCoordinates
+            raise InvalidCoordinates('Tile cooridnates have to be between '
+                                     '0 and 15')
 
-# brush marker here?
+    def __repr__(self) -> str:
+        return f'{self._location} - {self.__str__()}'
+
     def __str__(self) -> str:
         return 'wall'
 
 
 class StepableTile(InaccesibleTile):
-    def __init__(self, coordinates, ocupied=False) -> None:
+    def __init__(self, coordinates: tuple[int, int]) -> None:
         super().__init__(coordinates)
-        self._ocupied = ocupied
+        self._ocupied = False
 
     def can_hold(self) -> bool:
         return not self._ocupied
 
-    def set_ocupation(self, oc) -> None:
-        self._ocupied = oc
-# str -> repr loc + type
+    def set_ocupation(self, is_ocupied: bool) -> None:
+        self._ocupied = is_ocupied
 
-    def __str__(self):
+    def __str__(self) -> str:
         return 'floor'
 
 
 class ButtonTile(StepableTile):
-    def __init__(self, coordinates, ocupied=False):
-        super().__init__(coordinates, ocupied)
-        self._ocupied = ocupied
+    def __init__(self,
+                 coordinates: tuple[int, int],
+                 ) -> None:
+        super().__init__(coordinates)
 
-    def is_pressed(self):
+    def is_pressed(self) -> bool:
         return self._ocupied
 
-    def __str__(self):
+    def __str__(self) -> str:
         return 'button'
 
 
 class Agent():
-    def __init__(self, coordinates):
+    def __init__(self, coordinates: tuple[int, int]) -> None:
 
         if not (0 <= coordinates[0] < 16 and 0 <= coordinates[1] < 16):
-            raise InvalidCoordinates
+            raise InvalidCoordinates('Agent cooridnates have to be between '
+                                     '0 and 15')
         self.__location_x, self.__location_y = coordinates
 
-    def pos(self):
-        return (self.__location_x, self.__location_y)
+    @property
+    def pos(self) -> tuple[int, int]:
+        return self.__location_x, self.__location_y
 
-    def move_up(self):
+    def move_up(self) -> None:
         self.__location_y += 1
 
-    def move_down(self):
+    def move_down(self) -> None:
         self.__location_y -= 1
 
-    def move_left(self):
+    def move_left(self) -> None:
         self.__location_x -= 1
 
-    def move_right(self):
+    def move_right(self) -> None:
         self.__location_x += 1
 
 
 class Board():
     def __init__(self,
-                 tiles: dict[tuple[int, int]: InaccesibleTile],
+                 tiles: dict[tuple[int, int]:
+                             InaccesibleTile | StepableTile | ButtonTile],
                  buttons: list[int, int]
-                 ):
+                 ) -> None:
         self._tiles = tiles
         self._buttons = buttons
 
     @property
-    def tiles(self):
+    def tiles(self) -> dict[tuple[int, int]:
+                            InaccesibleTile | StepableTile | ButtonTile]:
         return self._tiles
 
     @property
-    def buttons(self):
+    def buttons(self) -> list[int, int]:
         return self._buttons
 
     def mark_tiles(self,
                    boxes: dict[int: Agent]
-                   ):
+                   ) -> None:
         for box_id in boxes:
             try:
-                self._tiles[boxes[box_id].pos()].set_ocupation(True)
+                self._tiles[boxes[box_id].pos].set_ocupation(True)
             except AttributeError:
-                raise InvalidOcupation
+                raise InvalidOcupation('A box is positioned on an inaccesible '
+                                       'tile')
             except KeyError:
-                raise InvalidCoordinates
-        # return self
+                raise InvalidCoordinates('Box out of bounds')
 
-    def check_correctness(self, boxes, player):
-        boxes_pos = {boxes[box_id].pos() for box_id in boxes}
+    def check_correctness(self,
+                          boxes: dict[tuple[int, int]: Agent],
+                          player: Agent
+                          ) -> None:
+        boxes_pos = {boxes[box_id].pos for box_id in boxes}
         if len(boxes_pos) != len(boxes):
-            raise InvalidOcupation
+            raise AgentsOverlaping('A box is positioned on top of another box')
         try:
-            if self._tiles[player.pos()].can_hold() is False:
-                raise InvalidOcupation
+            if self._tiles[player.pos].can_hold() is False:
+                raise AgentsOverlaping('Player is standing on top of a box')
+
         except AttributeError:
-            raise InvalidOcupation
+            raise InvalidOcupation('Player is on an inaccesible tile')
+
         except KeyError:
-            raise InvalidCoordinates
+            raise InvalidCoordinates('Player out of bounds')
 
     def validate_move(self,
                       agent: Agent,
                       move: str
                       ) -> bool:
-        x_coords, y_coords = agent.pos()
+        x_coords, y_coords = agent.pos
         actions = {
             'w': lambda x, y: (x, y+1),
             'a': lambda x, y: (x-1, y),
             's': lambda x, y: (x, y-1),
             'd': lambda x, y: (x+1, y),
         }
-        sus_pos = actions.get(move)(x_coords, y_coords)
-        if not sus_pos:
+        try:
+            sus_pos = actions.get(move)(x_coords, y_coords)
+        except TypeError:
             return False
 
         # check if out of bounds
         if sus_pos not in self._tiles:
             return False
+
         # check if tile is accesible and free
         try:
             if self._tiles[sus_pos].can_hold():
@@ -148,7 +168,6 @@ class Board():
         if sus_pos not in self._tiles:
             return False
         try:
-            # niech to nie zwraca pos i niech nie zmienia oc
             if self._tiles[sus_pos].can_hold():
                 return True
         except AttributeError:
@@ -162,7 +181,7 @@ class Game():
                  board: Board,
                  player: Agent,
                  boxes: dict[int: Agent]
-                 ):
+                 ) -> None:
         self.load_level(title, board, player, boxes)
 
     def load_level(self,
@@ -170,11 +189,9 @@ class Game():
                    board: Board,
                    player: Agent,
                    boxes: dict[int: Agent]
-                   ):
+                   ) -> None:
         self._title = title
         self._player = player
-        # self._level = board.tiles
-        # self._buttons = board.buttons
         self._board = board
         self._board.mark_tiles(boxes)
         self._boxes = boxes
@@ -182,110 +199,54 @@ class Game():
         self._board.check_correctness(boxes, player)
 
     @property
-    def player(self):
+    def player(self) -> Agent:
         return self._player
 
     @property
-    def title(self):
+    def title(self) -> str:
         return self._title
 
 # ???
     @property
-    def level(self):
+    def tiles(self) -> dict[tuple[int, int]:
+                            InaccesibleTile | StepableTile | ButtonTile]:
         return self._board.tiles
 
     @property
-    def boxes(self):
+    def boxes(self) -> dict[int: Agent]:
         return self._boxes
 
     @property
-    def moves(self):
+    def moves(self) -> list[tuple[str, tuple[int, int] | None]]:
         return len(self._moves)
 
-    def finb_box(self, coordinates):
+    def finb_box(self, coordinates: tuple[int, int]) -> tuple[int, int] | None:
         for box_id in self._boxes:
-            if self._boxes[box_id].pos() == coordinates:
+            if self._boxes[box_id].pos == coordinates:
                 return box_id
         else:
             return None
-            raise IndexError
 
-    def validate_move(self, move):
-        self.move(move)
-        # if self._board.validate_move(self._player, move):
-        #     self.move(move, self._player)
-#         try:
-#             self._moves.append((move, None))
-#             self.move(move, self._player)
-
-#         except KeyError:
-#             self.undo_move()
-#             return
-#         except AttributeError:
-#             self.undo_move()
-#             return
-#         self._board.validate_move(self._player, move)
-#         try:
-#             box_id = self.finb_box(self.player.pos())
-#             box = self._boxes[box_id]
-#         except IndexError:
-#             return
-
-#         try:
-#             self._moves.pop()
-#             self._moves.append((move, box_id))
-#             self.move(move, box)
-#             if not self._board.tiles[box.pos()].can_hold():
-#                 self.undo_move()
-#                 return
-#             # to to zaakomentowan
-#             self._board.mark_tiles(self._boxes)
-#             # self._level[self.player.pos()].set_ocupation(False)
-#             # self._level[box.pos()].set_ocupation(True)
-#             return
-# # todo jest to except key.... powtorzone 2x wiec moze przniezt to do move albo
-# # zamienic funkcjonalnoscia mow do sprawdzanie czy pudełko w validate tylko do
-# # except key error...
-#         except KeyError:
-#             self.undo_move()
-#             return
-#         except AttributeError:
-#             self.undo_move()
-#             return
-
-    def move(self, move):
+    def move(self, move: str) -> None:
         actions = {
             'w': Agent.move_up,
             'a': Agent.move_left,
             's': Agent.move_down,
             'd': Agent.move_right,
         }
-        move_status = self._board.validate_move(self._player, move)
-        if move_status:
+        if self._board.validate_move(self._player, move):
             actions[move](self._player)
-            box_id = self.finb_box(self._player.pos())
+            box_id = self.finb_box(self._player.pos)
             if box_id is None:
                 self._moves.append((move, None))
             else:
                 box = self._boxes[box_id]
                 actions[move](box)
-                self._board.tiles[self._player.pos()].set_ocupation(False)
-                self._board.tiles[box.pos()].set_ocupation(True)
+                self._board.tiles[self._player.pos].set_ocupation(False)
+                self._board.tiles[box.pos].set_ocupation(True)
                 self._moves.append((move, box_id))
 
-        # # level = self.level
-        # if action:
-        #     action(self._player)
-        # else:
-        #     self._moves.pop()
-        #     return
-
-#       ponizej przeneisc do validate
-        # tile = level[agent.pos()]
-        # tile.can_hold()
-
-# zmienic valid undo na undo move
-    def valid_undo(self):
+    def undo_move(self) -> None:
         reverse_action = {
             'w': Agent.move_down,
             'a': Agent.move_right,
@@ -298,23 +259,12 @@ class Game():
             reverse_action.get(move)(self._player)
             if agent is not None:
                 box = self._boxes[agent]
-                self._board.tiles[box.pos()].set_ocupation(False)
+                self._board.tiles[box.pos].set_ocupation(False)
                 reverse_action.get(move)(self._boxes[agent])
-                self._board.tiles[box.pos()].set_ocupation(True)
+                self._board.tiles[box.pos].set_ocupation(True)
             self._moves.pop()
 
-    # def valid_undo(self):
-    #     try:
-    #         agent = self._moves[-1][1]
-    #         self.level[self._boxes[agent].pos()].set_ocupation(False)
-    #         self.undo_move()
-    #         self.level[self._boxes[agent].pos()].set_ocupation(True)
-    #     except KeyError:
-    #         self.undo_move()
-    #     except IndexError:
-    #         pass
-
-    def game_ended(self):
+    def game_ended(self) -> bool:
         for button_id in self._board.buttons:
             if not self._board.tiles[button_id].is_pressed():
                 return False
