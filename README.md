@@ -50,7 +50,7 @@ There is a number of custom exceptions that are raised when an error occurs usua
 Each of them notifies the user with a short message regarding the issue.
 
 ## Get level data from files
-In the `load_level.py` module there is one main function (`get_level`) that uses three helper function to gather level data from given .json file and initialize respective objects.
+In the `load_level.py` module there is one main function (`get_level`) that uses three helper function to gather level data from given JSON file and initialize respective objects.
 
 ### Example of level file
 #### '0.json'
