@@ -5,7 +5,7 @@ from headers.ui_sokobon import Ui_gameWindow
 from headers.ui_menu import Ui_Menu
 from headers.ui_pass_screen import Ui_PassWindow
 from headers.ui_gui import Ui_MainWindow
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QPixmap
 from PySide6.QtCore import Qt, QTimer, Signal
 from model import Game
 from load_level import get_level
@@ -13,8 +13,8 @@ import sys
 
 
 GAME_SCALE = 1
-BTN_SIZE = 35 * GAME_SCALE
-AGENT_SIZE = 15 * GAME_SCALE
+BTN_SIZE = 32 * GAME_SCALE
+AGENT_SIZE = 32 * GAME_SCALE
 TILE_SIZE = 50 * GAME_SCALE
 
 
@@ -33,7 +33,7 @@ class Menu(QWidget):
 
 
 class PassScreen(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.ui = Ui_PassWindow()
         self.ui.setupUi(self)
@@ -72,7 +72,6 @@ class GameWindow(QWidget):
         return x_coords*TILE_SIZE-offset, y_coords*-TILE_SIZE-offset
 
     def _setup_tiles(self) -> None:
-        self._scene.clear()
         self.ui.levelView.setScene(self._scene)
         tiles = self._game.tiles
         fsize = self._format_size
@@ -85,37 +84,36 @@ class GameWindow(QWidget):
                 marker.setBrush(QColor("#444444"))
             elif str(tiles[tile_id]) == 'button':
                 fposition = self._format_position
-                marker = self._scene.addRect(*fsize(BTN_SIZE))
-                marker.setPos(*fposition(x_coords, y_coords, BTN_SIZE))
-                marker.setBrush(QColor("#ff0000"))
+                button_sprite = QPixmap('assets/button.png')
+                marker = self._scene.addPixmap(button_sprite)
+                marker.setPos(*fposition(x_coords, y_coords, -BTN_SIZE))
 
         label = self.ui.levelLabel
         label.setText(self._game.title)
 
     def _setup_boxes(self) -> None:
         for box_id in self._game.boxes:
-            fsize = self._format_size
-            marker = self._scene.addRect(*fsize(AGENT_SIZE))
-            marker.setBrush(QColor('#d5cdc9'))
+            box_sprite = QPixmap('assets/box.png')
+            marker = self._scene.addPixmap(box_sprite)
             self._box_markers[box_id] = marker
 
     def _draw_agents(self) -> None:
         x_coords, y_coords = self._game.player.pos
         fposition = self._format_position
-        self._player_marker.setPos(*fposition(x_coords, y_coords, AGENT_SIZE))
+        self._player_marker.setPos(*fposition(x_coords, y_coords, -AGENT_SIZE))
         for box_id in self._game.boxes:
             x_coords, y_coords = self._game.boxes[box_id].pos
             self._box_markers[box_id].setPos(*fposition(x_coords,
                                                         y_coords,
-                                                        AGENT_SIZE))
+                                                        -AGENT_SIZE))
         move_counter = self.ui.moveCounter
         move_counter.setText(f'Moves: {self._game.moves_num}')
 
     def _setup_level(self) -> None:
+        self._scene.clear()
         self._setup_tiles()
-        fsize = self._format_size
-        self._player_marker = self._scene.addEllipse(*fsize(AGENT_SIZE))
-        self._player_marker.setBrush(QColor("#0000ff"))
+        player_sprite = QPixmap('assets/player.png')
+        self._player_marker = self._scene.addPixmap(player_sprite)
         self._setup_boxes()
 
     def restart_level(self) -> None:
