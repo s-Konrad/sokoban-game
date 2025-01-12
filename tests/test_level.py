@@ -1,35 +1,87 @@
-from level import get_boxes, get_floor, get_player, load_data
-from classes import Agent, InvalidOcupation, InvalidTile
 import pytest
-from tests.test_classes import TestFiles
+from model import InvalidTile, InvalidAgent
+from load_level import get_title, get_board, get_player, get_boxes
+
+SAMPLE_DATA = {
+    'title': 'Test Level',
+    'tiles': [
+        {'id': [0, 0], 'type': 'floor'},
+        {'id': [1, 0], 'type': 'wall'},
+        {'id': [2, 0], 'type': 'button'}
+    ],
+    'player_pos': [0, 0],
+    'boxes': [
+        {'id': 1, 'position': [1, 1]},
+        {'id': 2, 'position': [2, 1]}
+    ]
+}
+
+
+def test_get_title():
+    title = get_title(SAMPLE_DATA)
+    assert title == 'Test Level'
+
+
+def test_get_board():
+    board = get_board(SAMPLE_DATA)
+    assert len(board.tiles) == 3
+    assert board.tiles[(0, 0)].can_hold()
+    assert board.tiles[(2, 0)].can_hold()
+    assert board.buttons == [(2, 0)]
 
 
 def test_get_player():
-    with open(TestFiles.example.value) as fp:
-        data = load_data(fp)
-        get_player(data) == Agent((0, 0))
+    player = get_player(SAMPLE_DATA)
+    assert player.pos == (0, 0)
 
 
-def test_get_floor():
-    with open(TestFiles.example.value) as fp:
-        data = load_data(fp)
-        tiles, name, button_ids = get_floor(data)
-        assert len(tiles) == 7
-        assert name == 'Level 1'
-        assert len(button_ids) == 1
-
-    with open(TestFiles.tile_e.value) as fp:
-        data = load_data(fp)
-        with pytest.raises(InvalidTile):
-            len(get_floor(data))
+def test_get_boxes():
+    boxes = get_boxes(SAMPLE_DATA)
+    assert len(boxes) == 2
+    assert boxes[1].pos == (1, 1)
+    assert boxes[2].pos == (2, 1)
 
 
-def test_get_box():
-    with open(TestFiles.example.value) as fp:
-        data = load_data(fp)
-        get_boxes(data) == {0: Agent((0, 1))}
+def test_duplicate_tile():
+    duplicate_tile_data = {
+        'title': 'Test Level with Duplicate Tiles',
+        'tiles': [
+            {'id': [0, 0], 'type': 'floor'},
+            {'id': [0, 0], 'type': 'wall'}
+        ],
+        'player_pos': [0, 0],
+        'boxes': []
+    }
 
-    with open(TestFiles.box_e.value) as fp:
-        data = load_data(fp)
-        with pytest.raises(InvalidOcupation):
-            get_boxes(data)
+    with pytest.raises(InvalidTile):
+        get_board(duplicate_tile_data)
+
+
+def test_incorect_tile_type():
+    duplicate_tile_data = {
+        'title': 'Test Level with Duplicate Tiles',
+        'tiles': [
+            {'id': [0, 0], 'type': 'floor'},
+            {'id': [0, 1], 'type': 'unknown'}
+        ],
+        'player_pos': [0, 0],
+        'boxes': []
+    }
+
+    with pytest.raises(InvalidTile):
+        get_board(duplicate_tile_data)
+
+
+def test_duplicate_box_id():
+    duplicate_box_data = {
+        'title': 'Test Level with Duplicate Boxes',
+        'tiles': [{'id': [0, 0], 'type': 'floor'}],
+        'player_pos': [0, 0],
+        'boxes': [
+            {'id': 1, 'position': [1, 1]},
+            {'id': 1, 'position': [2, 1]}
+        ]
+    }
+
+    with pytest.raises(InvalidAgent):
+        get_boxes(duplicate_box_data)
