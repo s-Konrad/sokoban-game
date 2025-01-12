@@ -19,18 +19,29 @@ TILE_SIZE = 50 * GAME_SCALE
 
 
 class Menu(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.ui = Ui_Menu()
         self.ui.setupUi(self)
 
+    def show_win_screen(self) -> None:
+        self.ui.playButton.hide()
+        win_text = 'Congrats you passed\n my Sokoban game'
+        win_color = 'color: gold'
+        self.ui.label.setText(win_text)
+        self.ui.label.setStyleSheet(win_color)
+
 
 class PassScreen(QWidget):
     def __init__(self, parent=None):
-        # dodac tu tytul level 1 complete
         super().__init__(parent)
         self.ui = Ui_PassWindow()
         self.ui.setupUi(self)
+
+    def pass_message(self, moves_num: int) -> None:
+        move_counter = self.ui.moveCounter
+        end_text = 'You finished in {moves_num} moves'
+        move_counter.setText(end_text.format(moves_num=moves_num))
 
 
 class GameWindow(QWidget):
@@ -40,14 +51,14 @@ class GameWindow(QWidget):
         super().__init__(parent)
         self.ui = Ui_gameWindow()
         self.ui.setupUi(self)
+
         self._scene = QGraphicsScene()
         self._game = game
         self._box_markers = {}
-        # id udsunac stad i podpiac sie pod game
         self._setup_level()
-        self.start_level()
+        self._draw_agents()
 
-        self.ui.resetButton.clicked.connect(self.start_level)
+        self.ui.resetButton.clicked.connect(self.restart_level)
         self.ui.undoButton.clicked.connect(self._undo_move)
 
     @staticmethod
@@ -107,32 +118,28 @@ class GameWindow(QWidget):
         self._player_marker.setBrush(QColor("#0000ff"))
         self._setup_boxes()
 
-    def start_level(self) -> None:
+    def restart_level(self) -> None:
         level_id = self._game.level_id
-        # nie wiem czy nie zrobic restart load +start
         self._game.load_level(level_id, *get_level(level_id))
         self._setup_level()
         self._draw_agents()
 
+    def next_level(self):
+        self._game.increment_level_id()
+        self.restart_level()
+
     def keyPressEvent(self, event) -> None:
         if event.key() == Qt.Key_R:
-            self.start_level()
+            self.restart_level()
         elif event.key() == Qt.Key_U:
             self._game.undo_move()
         else:
-            # to chyba mozna wydzilic
-            # mv = {
-            #     Qt.Key_R: self.start_level(),
-            #     Qt.Key_U: self._game._undo_move()
-            # }
-            self._game.move(event.text())
+            self._game.move(event.text().lower())
 
         self._draw_agents()
         if self._game.game_ended():
+            event.ignore()
             moves = self._game.moves_num
-            self._game.increment_level_id()
-            # zamiast tego load next level io ten rozdzielony start
-            # next level
             QTimer.singleShot(400, lambda: self.end_signal.emit(moves))
         return super().keyPressEvent(event)
 
@@ -146,10 +153,11 @@ class Gui(QMainWindow):
                  menu: Menu,
                  game_window: GameWindow,
                  pass_window: PassScreen,
-                 parent=None):
+                 parent=None) -> None:
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
         self.ui.stackedWidget.addWidget(menu)
         self.ui.stackedWidget.addWidget(game_window)
         self.ui.stackedWidget.addWidget(pass_window)
@@ -164,28 +172,19 @@ class Gui(QMainWindow):
         end_signal = self._game_window.end_signal
         end_signal.connect(self.go_to_pass_window)
 
-        self._pass_window.ui.nextLevelButton.clicked.connect(self.go_to_level)
+        self._pass_window.ui.nextLevelButton.clicked.connect(self.go_to_game)
 
     def go_to_pass_window(self, moves_num: int) -> None:
-        move_counter = self._pass_window.ui.moveCounter
-        end_text = 'You finished in {moves_num} moves'
-        move_counter.setText(end_text.format(moves_num=moves_num))
+        self._pass_window.pass_message(moves_num)
         self.ui.stackedWidget.setCurrentIndex(2)
 
-    def go_to_level(self) -> None:
+    def go_to_game(self) -> None:
 
         try:
-            self._game_window.start_level()
+            self._game_window.next_level()
             self.ui.stackedWidget.setCurrentIndex(1)
         except FileNotFoundError:
-            # widet(num zmienic na self.window)
-            # i t w funckji self home window
-            self.ui.stackedWidget.widget(0).ui.playButton.hide()
-            win_text = 'Congrats you passed\n my Sokoban game'
-            win_color = 'color: gold'
-            self.ui.stackedWidget.widget(0).ui.label.setText(win_text)
-            self.ui.stackedWidget.widget(0).ui.label.setStyleSheet(win_color)
-
+            self._menu.show_win_screen()
             self.ui.stackedWidget.setCurrentIndex(0)
 
 
@@ -198,10 +197,8 @@ def gui_main(argv):
     gui = Gui(menu_window, game_window, pass_window)
 
     gui.show()
-
     return app.exec()
 
 
 if __name__ == '__main__':
-
     gui_main(sys.argv)
