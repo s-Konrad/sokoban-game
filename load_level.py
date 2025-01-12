@@ -1,5 +1,5 @@
-from classes import (Agent, Board, InvalidOcupation, InvalidTile,
-                     StepableTile, InaccesibleTile, ButtonTile,)
+from model import (Agent, Board, InaccesibleTileOcupied, InvalidTile,
+                   StepableTile, InaccesibleTile, ButtonTile,)
 import json
 
 
@@ -39,10 +39,6 @@ def get_player(level_data: dict) -> Agent:
     position = tuple(player_pos)
     return Agent(position)
 
-# agent i dziedziczate box player ktoreych instancje bedza na liscie agent) +
-# sprawdzanie czy nie stoja na jednym
-# i usunąć id
-
 
 def get_boxes(level_data: dict) -> dict[Agent]:
     boxes = {}
@@ -51,11 +47,9 @@ def get_boxes(level_data: dict) -> dict[Agent]:
         id = box['id']
         position = tuple(box['position'])
         if id in boxes:
-            raise InvalidOcupation
+            raise InaccesibleTileOcupied
         boxes[id] = Agent(position)
     return boxes
-# gui i sprite https://forum.qt.io/topic/13628/getting-started-with-a-tile
-# -based-game-in-qt/2
 
 
 def get_level(level_id: int) -> tuple[str,

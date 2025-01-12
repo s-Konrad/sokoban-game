@@ -3,7 +3,7 @@ class InvalidTile(Exception):
         super().__init__(*args)
 
 
-class InvalidOcupation(Exception):
+class InaccesibleTileOcupied(Exception):
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -105,15 +105,15 @@ class Board():
     def buttons(self) -> list[int, int]:
         return self._buttons
 
-    def mark_tiles(self,
-                   boxes: dict[int: Agent]
-                   ) -> None:
+    def mark_tiles_as_taken(self,
+                            boxes: dict[int: Agent]
+                            ) -> None:
         for box_id in boxes:
             try:
                 self._tiles[boxes[box_id].pos].set_ocupation(True)
             except AttributeError:
-                raise InvalidOcupation('A box is positioned on an inaccesible '
-                                       'tile')
+                raise InaccesibleTileOcupied('A box is positioned on an'
+                                             'inaccesible tile')
             except KeyError:
                 raise InvalidCoordinates('Box out of bounds')
 
@@ -129,7 +129,7 @@ class Board():
                 raise AgentsOverlaping('Player is standing on top of a box')
 
         except AttributeError:
-            raise InvalidOcupation('Player is on an inaccesible tile')
+            raise InaccesibleTileOcupied('Player is on an inaccesible tile')
 
         except KeyError:
             raise InvalidCoordinates('Player out of bounds')
@@ -146,54 +146,56 @@ class Board():
             'd': lambda x, y: (x+1, y),
         }
         try:
-            sus_pos = actions.get(move)(x_coords, y_coords)
+            future_pos = actions.get(move)(x_coords, y_coords)
         except TypeError:
             return False
 
         # check if out of bounds
-        if sus_pos not in self._tiles:
+        if future_pos not in self._tiles:
             return False
 
         # check if tile is accesible and free
         try:
-            if self._tiles[sus_pos].can_hold():
+            if self._tiles[future_pos].can_hold():
                 return True
         except AttributeError:
             return False
-            raise InvalidOcupation('InaccesibleTile cannot be taken')
-        # above means that there is a box on the sus_pos
+
+        # above means that there is a box on the future_pos
         # check if player can push it
-        x_coords, y_coords = sus_pos
-        sus_pos = actions[move](x_coords, y_coords)
-        if sus_pos not in self._tiles:
+        x_coords, y_coords = future_pos
+        future_pos = actions[move](x_coords, y_coords)
+        if future_pos not in self._tiles:
             return False
         try:
-            if self._tiles[sus_pos].can_hold():
+            if self._tiles[future_pos].can_hold():
                 return True
         except AttributeError:
             return False
-            raise InvalidOcupation('InaccesibleTile cannot be taken')
 
 
 class Game():
     def __init__(self,
+                 id: int,
                  title: str,
                  board: Board,
                  player: Agent,
                  boxes: dict[int: Agent]
                  ) -> None:
-        self.load_level(title, board, player, boxes)
+        self.load_level(id, title, board, player, boxes)
 
     def load_level(self,
+                   id: int,
                    title: str,
                    board: Board,
                    player: Agent,
                    boxes: dict[int: Agent]
                    ) -> None:
+        self._current_level_id = id
         self._title = title
         self._player = player
         self._board = board
-        self._board.mark_tiles(boxes)
+        self._board.mark_tiles_as_taken(boxes)
         self._boxes = boxes
         self._moves = []
         self._board.check_correctness(boxes, player)
@@ -206,6 +208,13 @@ class Game():
     def title(self) -> str:
         return self._title
 
+    @property
+    def level_id(self) -> int:
+        return self._current_level_id
+
+    def increment_level_id(self) -> None:
+        self._current_level_id += 1
+
 # ???
     @property
     def tiles(self) -> dict[tuple[int, int]:
@@ -217,10 +226,10 @@ class Game():
         return self._boxes
 
     @property
-    def moves(self) -> list[tuple[str, tuple[int, int] | None]]:
+    def moves_num(self) -> list[tuple[str, tuple[int, int] | None]]:
         return len(self._moves)
 
-    def finb_box(self, coordinates: tuple[int, int]) -> tuple[int, int] | None:
+    def _find_box(self, coordinates: tuple[int, int]) -> int | None:
         for box_id in self._boxes:
             if self._boxes[box_id].pos == coordinates:
                 return box_id
@@ -236,7 +245,7 @@ class Game():
         }
         if self._board.validate_move(self._player, move):
             actions[move](self._player)
-            box_id = self.finb_box(self._player.pos)
+            box_id = self._find_box(self._player.pos)
             if box_id is None:
                 self._moves.append((move, None))
             else:
