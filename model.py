@@ -3,6 +3,11 @@ class InvalidTile(Exception):
         super().__init__(*args)
 
 
+class InvalidAgent(Exception):
+    def __init__(self, *args):
+        super().__init__(*args)
+
+
 class InaccesibleTileOcupied(Exception):
     def __init__(self, *args):
         super().__init__(*args)
@@ -91,7 +96,7 @@ class Board():
     def __init__(self,
                  tiles: dict[tuple[int, int]:
                              InaccesibleTile | StepableTile | ButtonTile],
-                 buttons: list[int, int]
+                 buttons: list[tuple[int, int]]
                  ) -> None:
         self._tiles = tiles
         self._buttons = buttons
@@ -102,7 +107,7 @@ class Board():
         return self._tiles
 
     @property
-    def buttons(self) -> list[int, int]:
+    def buttons(self) -> list[tuple[int, int]]:
         return self._buttons
 
     def mark_tiles_as_taken(self,
