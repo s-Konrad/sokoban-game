@@ -54,7 +54,6 @@ class GameWindow(QWidget):
 
         self._scene = QGraphicsScene()
         self._game = game
-        self._box_markers = {}
         self._setup_level()
         self._draw_agents()
 
@@ -92,6 +91,7 @@ class GameWindow(QWidget):
         label.setText(self._game.title)
 
     def _setup_boxes(self) -> None:
+        self._box_markers = {}
         for box_id in self._game.boxes:
             box_sprite = QPixmap('assets/box.png')
             marker = self._scene.addPixmap(box_sprite)
@@ -136,7 +136,6 @@ class GameWindow(QWidget):
 
         self._draw_agents()
         if self._game.game_ended():
-            event.ignore()
             moves = self._game.moves_num
             QTimer.singleShot(400, lambda: self.end_signal.emit(moves))
         return super().keyPressEvent(event)
