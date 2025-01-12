@@ -6,9 +6,9 @@ from headers.ui_menu import Ui_Menu
 from headers.ui_pass_screen import Ui_PassWindow
 from headers.ui_gui import Ui_MainWindow
 from PySide6.QtGui import QColor
-from PySide6.QtCore import Qt, QTimer
-from classes import Game
-from level import get_level
+from PySide6.QtCore import Qt, QTimer, Signal
+from model import Game
+from load_level import get_level
 import sys
 
 
@@ -27,49 +27,40 @@ class Menu(QWidget):
 
 class PassScreen(QWidget):
     def __init__(self, parent=None):
+        # dodac tu tytul level 1 complete
         super().__init__(parent)
         self.ui = Ui_PassWindow()
         self.ui.setupUi(self)
 
 
 class GameWindow(QWidget):
-    def __init__(self, game, parent=None):
+    end_signal = Signal(int)
+
+    def __init__(self, game: Game, parent=None) -> None:
         super().__init__(parent)
         self.ui = Ui_gameWindow()
         self.ui.setupUi(self)
         self._scene = QGraphicsScene()
         self._game = game
         self._box_markers = {}
+        # id udsunac stad i podpiac sie pod game
         self._setup_level()
-        self.restart_level()
+        self.start_level()
 
-        self.ui.resetButton.clicked.connect(self.restart_level)
+        self.ui.resetButton.clicked.connect(self.start_level)
         self.ui.undoButton.clicked.connect(self._undo_move)
 
-    def _undo_move(self):
-        self._game.undo_move()
-        self._draw_agents()
-        # move counter do funkcji najlepiej jakiejs do rysowania
-        move_counter = self.ui.moveCounter
-        move_counter.setText(f'Moves: {self._game.moves}')
-
     @staticmethod
-    def _format_size(size):
+    def _format_size(size: int) -> tuple[int, int, int, int]:
         return -size, -size, size, size
 
     @staticmethod
-    def _format_position(x_coords, y_coords, object_size):
+    def _format_position(x_coords: int, y_coords: int, object_size: int
+                         ) -> tuple[float, float]:
         offset = (TILE_SIZE-object_size)/2
         return x_coords*TILE_SIZE-offset, y_coords*-TILE_SIZE-offset
 
-    def _setup_level(self):
-        self._setup_tiles()
-        fsize = self._format_size
-        self._player_marker = self._scene.addEllipse(*fsize(AGENT_SIZE))
-        self._player_marker.setBrush(QColor("#0000ff"))
-        self._setup_boxes()
-
-    def _setup_tiles(self):
+    def _setup_tiles(self) -> None:
         self._scene.clear()
         self.ui.levelView.setScene(self._scene)
         tiles = self._game.tiles
@@ -89,42 +80,15 @@ class GameWindow(QWidget):
 
         label = self.ui.levelLabel
         label.setText(self._game.title)
-        move_counter = self.ui.moveCounter
-        move_counter.setText(f'Moves: {self._game.moves}')
 
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_R:
-            self.restart_level()
-        elif event.key() == Qt.Key_U:
-            self._game.undo_move()
-        else:
-            # to chyba mozna wydzilic
-            # mv = {
-            #     Qt.Key_R: self.restart_level(),
-            #     Qt.Key_U: self._game._undo_move()
-            # }
-            self._game.move(event.text())
-
-        self._draw_agents()
-        if self._game.game_ended():
-            end_text = 'You finished in {moves_num} moves'
-            self.parent().widget(2).ui.moveCounter.setText(end_text.format(
-                moves_num=self._game.moves))
-
-            QTimer.singleShot(400, lambda: self.parent().setCurrentIndex(2))
-            # @todo mozna to z gui albo next level z next level
-        move_counter = self.ui.moveCounter
-        move_counter.setText(f'Moves: {self._game.moves}')
-        return super().keyPressEvent(event)
-
-    def _setup_boxes(self):
+    def _setup_boxes(self) -> None:
         for box_id in self._game.boxes:
             fsize = self._format_size
             marker = self._scene.addRect(*fsize(AGENT_SIZE))
             marker.setBrush(QColor('#d5cdc9'))
             self._box_markers[box_id] = marker
 
-    def _draw_agents(self):
+    def _draw_agents(self) -> None:
         x_coords, y_coords = self._game.player.pos
         fposition = self._format_position
         self._player_marker.setPos(*fposition(x_coords, y_coords, AGENT_SIZE))
@@ -133,15 +97,47 @@ class GameWindow(QWidget):
             self._box_markers[box_id].setPos(*fposition(x_coords,
                                                         y_coords,
                                                         AGENT_SIZE))
-
-    def restart_level(self):
-        # hmmmm
-        # tu mozna dac ustawianie pc w zalezonosci od przeekazanego nums
-        level = self._game.title[6:]
-        self._game.load_level(*get_level(level))
         move_counter = self.ui.moveCounter
-        move_counter.setText(f'Moves: {self._game.moves}')
+        move_counter.setText(f'Moves: {self._game.moves_num}')
+
+    def _setup_level(self) -> None:
+        self._setup_tiles()
+        fsize = self._format_size
+        self._player_marker = self._scene.addEllipse(*fsize(AGENT_SIZE))
+        self._player_marker.setBrush(QColor("#0000ff"))
+        self._setup_boxes()
+
+    def start_level(self) -> None:
+        level_id = self._game.level_id
+        # nie wiem czy nie zrobic restart load +start
+        self._game.load_level(level_id, *get_level(level_id))
         self._setup_level()
+        self._draw_agents()
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key_R:
+            self.start_level()
+        elif event.key() == Qt.Key_U:
+            self._game.undo_move()
+        else:
+            # to chyba mozna wydzilic
+            # mv = {
+            #     Qt.Key_R: self.start_level(),
+            #     Qt.Key_U: self._game._undo_move()
+            # }
+            self._game.move(event.text())
+
+        self._draw_agents()
+        if self._game.game_ended():
+            moves = self._game.moves_num
+            self._game.increment_level_id()
+            # zamiast tego load next level io ten rozdzielony start
+            # next level
+            QTimer.singleShot(400, lambda: self.end_signal.emit(moves))
+        return super().keyPressEvent(event)
+
+    def _undo_move(self) -> None:
+        self._game.undo_move()
         self._draw_agents()
 
 
@@ -160,26 +156,30 @@ class Gui(QMainWindow):
         self._pass_window = pass_window
         self._menu = menu
         self._game_window = game_window
-        self._pc = 1
 
         play = self._menu.ui.playButton
         play.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
-        self._pass_window.ui.nextLevelButton.clicked.connect(self.go_to_level)
         self._menu.ui.quitButton.clicked.connect(self.close)
 
-    def go_to_level(self):
+        end_signal = self._game_window.end_signal
+        end_signal.connect(self.go_to_pass_window)
+
+        self._pass_window.ui.nextLevelButton.clicked.connect(self.go_to_level)
+
+    def go_to_pass_window(self, moves_num: int) -> None:
+        move_counter = self._pass_window.ui.moveCounter
+        end_text = 'You finished in {moves_num} moves'
+        move_counter.setText(end_text.format(moves_num=moves_num))
+        self.ui.stackedWidget.setCurrentIndex(2)
+
+    def go_to_level(self) -> None:
 
         try:
-            self._pc += 1
-            self._pass_window.ui.moveCounter.setText(
-                str(self._game_window._game.moves))
-            self._game_window._game.load_level(*get_level(self._pc))
-            # pc dac tez do game i zabrac stad setuplevel i na pewno draw agentss
-            self._game_window.restart_level()
-            # self._game_window._setup_level()
-            # self._game_window._draw_agents()
+            self._game_window.start_level()
             self.ui.stackedWidget.setCurrentIndex(1)
         except FileNotFoundError:
+            # widet(num zmienic na self.window)
+            # i t w funckji self home window
             self.ui.stackedWidget.widget(0).ui.playButton.hide()
             win_text = 'Congrats you passed\n my Sokoban game'
             win_color = 'color: gold'
@@ -191,7 +191,7 @@ class Gui(QMainWindow):
 
 def gui_main(argv):
     app = QApplication(argv)
-    game = Game(*get_level(1))
+    game = Game(0, *get_level(0))
     menu_window = Menu()
     game_window = GameWindow(game)
     pass_window = PassScreen()
