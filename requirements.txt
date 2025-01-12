@@ -1,39 +1,8 @@
 iniconfig==2.0.0
 packaging==24.2
 pluggy==1.5.0
-PySide6==6.8.1
-PySide6_Addons==6.8.1
-PySide6_Essentials==6.8.1
+PySide6==6.8.1.1
+PySide6_Addons==6.8.1.1
+PySide6_Essentials==6.8.1.1
 pytest==8.3.4
-shiboken6==6.8.1
-
-
-
-placeholder Notes:
-def gui_main(argv):
-    app = QApplication(argv)
-    game = Game(*get_level(1))
-    # stack = QStackedWidget()
-    menu_window = Menu()
-    game_window = GameWindow(game)
-    pass_window = PassScreen()
-    gui = Gui(menu_window, game_window, pass_window)
-    gui.setMinimumSize(QSize(960, 540))
-    # if not stack.objectName():
-    #     stack.setObjectName(u"stack")
-    # stack.resize(800, 800)
-
-    # stack.addWidget(menu_window)
-    # stack.addWidget(game_window)
-    # stack.addWidget(pass_window)
-    # menu_window.stack = stack
-    # game_window.stack = stack
-    # pass_window.stack = stack
-    # stack.show()
-    gui.show()
-    # pass_window.ui.nextLevelButton.clicked.connect(pass_window.go_to_level)
-    # gui.ui.stackedWidget.setCurrentIndex(0)
-    # gui.ui.stackedWidget.setCurrentIndex(0)
-    # game_window.show()
-    # menu_window.show()
-    return app.exec()
+shiboken6==6.8.1.1

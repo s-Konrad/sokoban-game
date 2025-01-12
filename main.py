@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QApplication, QGraphicsScene, QWidget
 from PySide6.QtWidgets import QMainWindow
 
-from headers.ui_sokobon import Ui_gameWindow
+from headers.ui_sokoban import Ui_gameWindow
 from headers.ui_menu import Ui_Menu
 from headers.ui_pass_screen import Ui_PassWindow
 from headers.ui_gui import Ui_MainWindow
