@@ -1,6 +1,13 @@
-from model import (Agent, Board, InaccesibleTileOcupied, InvalidTile,
-                   StepableTile, InaccesibleTile, ButtonTile,)
+from model import (Agent, Board, InvalidTile,
+                   StepableTile, InaccesibleTile, ButtonTile, InvalidAgent)
 import json
+
+
+def convert_to_int(data):
+    output_list = []
+    for element in data:
+        output_list.append(int(element))
+    return tuple(output_list)
 
 
 def load_data(fp) -> dict:
@@ -22,11 +29,12 @@ def get_board(level_data: dict) -> tuple[str, Board]:
     buttons_ids = []
     tiles_list = level_data['tiles']
     for tile in tiles_list:
-        id = tuple(tile['id'])
+        id = convert_to_int(tile['id'])
         type_ = tile['type']
         if id in tiles:
             raise InvalidTile('Tile already exists')
-
+        if type_ not in types_dict:
+            raise InvalidTile('Incorrect tile type')
         tiles[id] = types_dict[type_](id)
         if type_ == 'button':
             buttons_ids.append(id)
@@ -35,8 +43,7 @@ def get_board(level_data: dict) -> tuple[str, Board]:
 
 
 def get_player(level_data: dict) -> Agent:
-    player_pos = level_data['player_pos']
-    position = tuple(player_pos)
+    position = convert_to_int(level_data['player_pos'])
     return Agent(position)
 
 
@@ -44,10 +51,10 @@ def get_boxes(level_data: dict) -> dict[Agent]:
     boxes = {}
     boxes_list = level_data['boxes']
     for box in boxes_list:
-        id = box['id']
-        position = tuple(box['position'])
+        id = int(box['id'])
+        position = convert_to_int(box['position'])
         if id in boxes:
-            raise InaccesibleTileOcupied
+            raise InvalidAgent('Box with this id already exists')
         boxes[id] = Agent(position)
     return boxes
 
