@@ -1,6 +1,7 @@
 import pytest
 from model import (Agent, InaccesibleTile, StepableTile, ButtonTile, Board,
-                   Game, InvalidCoordinates, InaccesibleTileOcupied, AgentsOverlaping)
+                   Game, InvalidCoordinates, InaccesibleTileOcupied,
+                   AgentsOverlaping)
 
 
 # Test Tiles
@@ -16,12 +17,12 @@ def test_valid_inaccesible_tile_creation():
 
 def test_stepable_tile_creation():
     tile = StepableTile((5, 5))
-    assert tile.can_hold() == True
+    assert tile.can_hold()
 
 
 def test_button_tile_creation():
     tile = ButtonTile((5, 5))
-    assert tile.is_pressed() == False
+    assert not tile.is_pressed()
 
 
 # Test Agent
