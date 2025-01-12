@@ -2,106 +2,97 @@
 **Skwierczyński Konrad**,
 Student id: 337 284
 
-# Skokoban Game
-The program is centered around using OOP paradigms to reconstruct popular puzzle game - Sokoban. The minor conceptiual difference is that in this version there are buttons that need to be pressed instead of holding places.
+# Sokoban Game
+
+The program is centered around using OOP paradigms to reconstruct the popular puzzle game, **Sokoban**. Sokoban is a puzzle game where the player controls a character tasked with pushing boxes onto designated target locations within a maze-like environment.  
+The minor conceptual difference in this version is that there are **buttons** that need to be pressed instead of holding places, and boxes are represented as **barrels** for aesthetic purposes.
 
 ## Gameplay
-The board has the maximum size of 16x16 and consists of squares representing floor (light grey) as well as walls (dark grey). On some of the floor tiles there are red squares. They represent buttons which number coresponds to the number of boxes in each level. 
 
-Player uses WASD keys to move around. They can only step on stepable (floor and button) tiles. They can push a box (small beige square) by steping on the tile that contains said box. Boxes cannot be pushed out of bounds, on top of a wall or another box.  
+The board has a maximum size of **16x16** and consists of squares representing **floor** (light grey) as well as **walls** (dark grey). On some of the floor tiles, there are **red squares**, which represent buttons. The number of these buttons corresponds to the number of boxes in each level.
 
-The aim of the game is to complete all of the levels. In order to pass to the next level player has to position all of the presented boxes on top of the buttons. To prevent softlock situations, restart option is provided (R-key or restart button), and to prevent, tiresome repetitiveness undo option is facilicated (U-key or undo button).
+The **Player** (represented by a **knight sprite**) uses the **WASD keys** to move around. They can only step on **stepable** (floor and button) tiles. The player can push a **box** (represented as a **barrel sprite**) by stepping on the tile containing the box. Boxes cannot be pushed out of bounds, onto walls, or another box.
 
-# Program structure
-The program is structured around three modules focused respectively on: loading level data from file, executing game logic, implementing GUI.
+The aim of the game is to complete all the levels. In order to pass to the next level, the player must position all the boxes on top of the buttons. To prevent softlock situations, the program includes a restart option (**R-key** or restart button), and to avoid tiresome repetitiveness, an undo option is available (**U-key** or undo button).
 
-## Gui
+## Program Structure
 
-Graphical interface consists of three views: menu screen, game window, pass screen. They are handled by an overarching widget that stores them and is responsible for switching screens.
+The program is structured into three modules, each handling a specific aspect of the game:
 
-## Model
+1. **Model**:  
+   - Handles the game logic, including tile representation, agents, and board management.
+   - Includes classes for **Tiles**, **Agents**, **Board**, **Game** logic, and **Exceptions**.
+  
+2. **GUI**:  
+   - The graphical interface consists of three views: the **menu screen**, **game window**, and **pass screen**. 
+   - These are managed by an overarching widget responsible for switching screens.
 
-#### Tile Classes
-Responsible for implementing diferent types of tiles.
+3. **Load data**:  
+   - Data is loaded from **JSON files** containing the level information.
 
-- **InaccesibleTile**:
-Class representing a wall tile that cannot be stepped on.
-- **StepableTile**:
-Class rapresenting a floor tile that differs from a wall tile by having methods regarding its ocupation.
-- **ButtonTile**:
-Class representing a button tile that has to contain a box regarding level completion conditions.
+### Tile Classes
 
-#### Agent
-Class which independed instances are able to move either by user input or game logic occuriences.
+**Tile Classes** represent the different types of tiles in the game:
 
-#### Board
-Class that stores information about a board (tiles, buttons) and is respponsible for handling non executive game logic (marks tiles that have a box on them, checks board correctnes, checks if a move is valid).
+- **InaccesibleTile**:  
+  Represents a **wall** tile that cannot be stepped on.
 
-#### Game
-Main game logic class that stores game data (level id, title, board, player, boxes, number of moves made by the player) and renders avaliable methods responsible for loading a level, move handling and checking if level completion conditions are satisfied.
+- **StepableTile**:  
+  Represents a **floor** tile that can be occupied.
 
-#### Exceptions
-There is a number of custom exceptions that are raised when an error occurs usually because of faulty level data.
-- InvalidTile
-- InvalidOcupation
-- AgentsOverlaping 
-- InvalidCoordinates   
+- **ButtonTile**:  
+  Represents a **button** tile that must contain a box to meet the level's completion conditions.
 
-Each of them notifies the user with a short message regarding the issue.
+### Agent Class
 
-## Get level data from files
-In the `load_level.py` module there is one main function (`get_level`) that uses three helper function to gather level data from given JSON file and initialize respective objects.
+The **Agent** class represents the player or a box. Each agent can move either through user input or game logic occurrences.
 
-### Example of level file
-#### '0.json'
-``` JSON
+### Board Class
+
+The **Board** class stores information about the game board, including tiles and buttons. It is responsible for handling non executive game logic (e.g., marking tiles as occupied, checking the validity of moves).
+
+### Game Class
+
+The **Game** class handles the main game logic, including storing game data (level id, title, board, player, boxes, number of moves), loading levels, and verifying completion conditions.
+
+### Exceptions
+
+Custom exceptions are raised to handle various errors in the game, particularly due to faulty level data:
+
+- **InvalidTile**: Raised when a tile is invalid.
+- **InvalidOccupation**: Raised when an agent attempts to move to an invalid tile.
+- **AgentsOverlapping**: Raised when two agents overlap.
+- **InvalidCoordinates**: Raised when coordinates are invalid or out of bounds.
+
+## Level Data
+
+In the `load_level.py` module, the `get_level()` function gathers level data from a JSON file and initializes respective game objects.
+
+Level JSON files have to be named `{level_id}.json` where `level_id` are consecutive whole numberes starting from 0. Level files are NOT to be named by the level title. It can be freely set in the title section of the JSON file.
+### Example of a Level File (e.g., '0.json')
+
+```json
 {
     "title": "Level 0 - Example",
     "tiles":[
-        {
-            "id":[0, 0],
-            "type": "floor"
-        },
-        {
-            "id":[1, 0],
-            "type": "floor"
-        },
-        {
-            "id":[0, 1],
-            "type": "floor"
-        },
-        {
-            "id":[1, 1],
-            "type": "floor"
-        },
-        {
-            "id":[1, 2],
-            "type": "wall"
-        },
-        {
-            "id":[0, 2],
-            "type": "button"
-        },
-        {
-            "id":[0, 3],
-            "type": "floor"
-        }
+        {"id":[0, 0], "type": "floor"},
+        {"id":[1, 0], "type": "floor"},
+        {"id":[0, 1], "type": "floor"},
+        {"id":[1, 1], "type": "floor"},
+        {"id":[1, 2], "type": "wall"},
+        {"id":[0, 2], "type": "button"},
+        {"id":[0, 3], "type": "floor"}
     ],
     "player_pos": [0, 0],
     "boxes": [
-        {
-            "id": 0,
-            "position":[0, 1]
-        }
+        {"id": 0, "position":[0, 1]}
     ]
 }
 ```
 
-
 ## Use and Configuration
-Program was written and tested on Python 3.12. 
-Program supports only graphical user interface.  
-Level JSON files have to be named {level_id}.json where level_id are consecutive whole numberes starting from 0. Level files are NOT to be named by the level title. It can be freely set in the title section of the JSON file.
+Program was written and tested on **Python 3.12**. 
+It only supports **graphical user interface**.  
 
 Before running the program install required packages.
 ```sh
@@ -118,10 +109,11 @@ python3 main.py
 ```
 
 ## Discussion
-There are some potential issues to adress.  
-- During the planning phase there was an idea regarding  support for multiple player agents (still controled by one user), but it was shelved as it was not requred and wolud cause some bloating to the code.
-- Graphical user interface isn't polished and would greatly benefit from some assets.
-- Another GUI related topic is one regarding size of the window and sliders. Currently minimal size of the winndow is set, to reserve space for 'sprites'. Basic scaling would be appreciated.
-- Condition to prevent agents from going out of bounds seems redundant as most Sokoban levels for aesthetic reasons are designed with walls all around.   
-The upsides of not needing the walls as a border are: shorter files that represent levels, and leaving more space for puzzle design and player movement (a true 16x16 board instead of 14x14 when you take away the border).
-- In hindsight JSON files seem a bit awkward and lengthly. Perhaps YAML representation would be more human friendly
+While the game functions as intended, there are some potential issues to adress:
+- **Multiple player agents**: Initially considered adding support for multiple player agents (controlled by the same user) but decided against it to avoid unnecessary complexity.
+- **Graphical Interface**: The GUI could be further refined. Adding custom assets would significantly improve the visual experience.
+- **Window size and scaling**: Currently, the window has a minimal size to fit the sprites. Basic scaling options would improve the user experience.
+- **Border Walls**: Condition to prevent agents from going out of bounds seems redundant as most Sokoban levels for aesthetic reasons are designed with walls all around.   
+The upsides of not needing the walls as a border are: shorter files that represent levels, and leaving more space for puzzle design and player movement (a true **16x16** board instead of **14x14** when you take away the border).
+- **Level representation as a file**: In hindsight JSON files seem a bit awkward and lengthly. Perhaps YAML representation would be more human friendly
+- **Assets** were taken from `https://sethbb.itch.io/32rogues` (free assets by user Seth, license included in assets folder)
