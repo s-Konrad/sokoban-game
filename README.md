@@ -1,6 +1,5 @@
 ### Author
-**Skwierczyński Konrad**,
-Student id: 337 284
+**Skwierczyński Konrad**
 
 # Sokoban Game
 
